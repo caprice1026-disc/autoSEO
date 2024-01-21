@@ -109,11 +109,12 @@ def main(section1, section2):
     memo = section2['memo']
     # ここから下は、section2の内容を使ってコンテンツを作成する処理
     prompt = {
-    f'あなたは優秀なSEOライターです。"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' f'コンテンツの目的は"""{goal}"""です。タイトルは"""{title}"""です。'
+    f'あなたは優秀なSEOライターです。"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
+    f'コンテンツの目的は"""{goal}"""です。タイトルは"""{title}"""です。'
 }
     
     response = openai_api_call(
-        
+
     )
 
 
