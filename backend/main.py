@@ -3,7 +3,7 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from openaiapi import fileimport
+from openaiapi import seo_rival
 
 api_key = os.environ.get('GOOGLE_API_KEY')
 cse_id = os.environ.get('GOOGLE_CSE_ID')
@@ -83,15 +83,23 @@ def main(section1, section2):
                 contents.append(parsed_content)
 
             results[url] = contents
-    
-    # 結果をテキストファイルに出力
-    with open('results.txt', 'w', encoding='utf-8') as file:
-        for url, content_list in results.items():
-            file.write(f"URL: {url}\n")
-            for content in content_list:
-                file.write(f"{content}\n\n")
-            file.write("\n\n")
-            fileimport('results.txt')
+
+    # 結果を文字列として組み立て
+    results_content = ""
+    for url, content_list in results.items():
+        results_content += f"URL: {url}\n"
+        for content in content_list:
+            results_content += f"{content}\n\n"
+        results_content += "\n\n"
+    # 他の処理にresults_contentを使用することも可能
+    seo_essense = seo_rival(results_content)
+    print(seo_essense)
+
+
+
+
+
+            
 
 
     
