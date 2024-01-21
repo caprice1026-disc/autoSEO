@@ -7,7 +7,7 @@ import os
 import json
 from flask import Flask, request, jsonify, render_template
 from markupsafe import escape
-from main import process_json
+from backend.main import process_json
 
 app = Flask(__name__)
 

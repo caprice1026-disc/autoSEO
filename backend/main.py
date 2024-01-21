@@ -3,6 +3,7 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
+from openaiapi import fileimport
 
 api_key = os.environ.get('GOOGLE_API_KEY')
 cse_id = os.environ.get('GOOGLE_CSE_ID')
@@ -81,9 +82,17 @@ def main(section1, section2):
                 parsed_content = parse_content(content)
                 contents.append(parsed_content)
 
-        results[url] = contents
+            results[url] = contents
     
-    print(results)
+    # 結果をテキストファイルに出力
+    with open('results.txt', 'w', encoding='utf-8') as file:
+        for url, content_list in results.items():
+            file.write(f"URL: {url}\n")
+            for content in content_list:
+                file.write(f"{content}\n\n")
+            file.write("\n\n")
+            fileimport('results.txt')
+
 
     
 # JSONデータの例
