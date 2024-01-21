@@ -113,9 +113,8 @@ def main(section1, section2):
     f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
 }
     
-    response = openai_api_call(
-
-    )
+# ここから再帰的に各タグの内容を生成
+# その後組み立てて出力
 
 
 
