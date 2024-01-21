@@ -3,7 +3,8 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from openaiapi import seo_rival
+from openaiapi import seo_rival, openai_api_call
+
 
 api_key = os.environ.get('GOOGLE_API_KEY')
 cse_id = os.environ.get('GOOGLE_CSE_ID')
@@ -94,7 +95,26 @@ def main(section1, section2):
     # 他の処理にresults_contentを使用することも可能
     seo_essense = seo_rival(results_content)
     # seo_essenseは後で使う
-
+    # section1の各内容を取得
+    expected_reader = section1['expected_reader']
+    search_intent = section1['search_intent']
+    goal = section1['goal']
+    title = section1['title']
+    # section2の各内容を取得
+    entry = section2['entry']
+    headline = section2['headline']
+    outline = section2['outline']
+    number_of_words = section2['number_of_words']
+    must_KW = section2['must_KW']
+    memo = section2['memo']
+    # ここから下は、section2の内容を使ってコンテンツを作成する処理
+    prompt = {
+    f'あなたは優秀なSEOライターです。"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' f'コンテンツの目的は"""{goal}"""です。タイトルは"""{title}"""です。'
+}
+    
+    response = openai_api_call(
+        
+    )
 
 
 
