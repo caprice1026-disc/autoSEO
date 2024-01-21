@@ -92,9 +92,9 @@ def main(section1, section2):
         for content in content_list:
             results_content += f"{content}\n\n"
         results_content += "\n\n"
-    # 他の処理にresults_contentを使用することも可能
+
     seo_essense = seo_rival(results_content)
-    # seo_essenseは後で使う
+
     # section1の各内容を取得
     expected_reader = section1['expected_reader']
     search_intent = section1['search_intent']
@@ -108,7 +108,7 @@ def main(section1, section2):
     must_KW = section2['must_KW']
     memo = section2['memo']
     # ここから下は、section2の内容を使ってコンテンツを作成する処理
-    prompt = {
+    system_prompt = {
     f'あなたは優秀なSEOライターです。"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
     f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
 }
