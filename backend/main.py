@@ -69,7 +69,7 @@ def parse_content(content):
         return ""
     
 def main(section1, section2):
-    keywords = section1['キーワード']
+    keywords = section1['keyword']
     results = {}
 
     for keyword in keywords:
@@ -93,7 +93,7 @@ def main(section1, section2):
         results_content += "\n\n"
     # 他の処理にresults_contentを使用することも可能
     seo_essense = seo_rival(results_content)
-    print(seo_essense)
+    # seo_essenseは後で使う
 
 
 
@@ -107,19 +107,19 @@ def main(section1, section2):
 '''
 {
   "section1": {
-    "キーワード": ["サンプルキーワード1", "サンプルキーワード2"],
-    "想定される読者": "サンプル読者層",
-    "検索意図": "情報提供",
-    "ゴール": "読者の理解向上",
-    "タイトル": "サンプルタイトル"
+    "keyword": ["サンプルキーワード1", "サンプルキーワード2"],
+    "expected_reader": "サンプル読者層",
+    "search_intent": "情報提供",
+    "goal": "読者の理解向上",
+    "title": "サンプルタイトル"
   },
   "section2": {
-    "項目": "サンプル項目",
-    "見出し": "サンプル見出し",
-    "概要": "ここに概要が入ります",
-    "文字数": 500,
-    "必須KW": ["キーワード1", "キーワード2"],
-    "メモ": "ここにメモが入ります"
+    "entry": "サンプル項目",
+    "headline": "サンプル見出し",
+    "outline": "ここに概要が入ります",
+    "number_of_words": 500,
+    "must_KW": ["キーワード1", "キーワード2"],
+    "memo": "ここにメモが入ります"
   }
 }
 '''
