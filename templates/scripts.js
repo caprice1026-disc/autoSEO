@@ -36,8 +36,8 @@ function submitForm() {
     const inputs = document.querySelectorAll('.form-container input, .form-container select');
     inputs.forEach((input, index) => {
         //resultに足す必要がある
-        result += 
-    });
+        result += input
+　  });
 
     document.getElementById('result').textContent = result;
     document.getElementById('submit-message').textContent = '送信されました';
