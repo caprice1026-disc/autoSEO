@@ -108,10 +108,11 @@ def main(section1, section2):
     must_KW = section2['must_KW']
     memo = section2['memo']
     # ここから下は、section2の内容を使ってコンテンツを作成する処理
-    system_prompt = {
+    system_prompt = (
     f'あなたは優秀なSEOライターです。"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
     f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
-}
+    
+    )
     
 # ここから再帰的に各タグの内容を生成
 # その後組み立てて出力
@@ -123,7 +124,7 @@ def main(section1, section2):
 
 
     
-# JSONデータの例
+# JSONデータの例。headline2のように、省略されている項目もある。headlineは各項目の見出しを表す。
 '''
 {
   "section1": {
@@ -134,12 +135,20 @@ def main(section1, section2):
     "title": "サンプルタイトル"
   },
   "section2": {
-    "entry": "サンプル項目",
-    "headline": "サンプル見出し",
-    "outline": "ここに概要が入ります",
-    "number_of_words": 500,
-    "must_KW": ["キーワード1", "キーワード2"],
-    "memo": "ここにメモが入ります"
+    "headline1": {
+      "entry": "h1, h2, h3, h4, h5, h6のどれか",
+      "outline": "ここにheadline1の記事の概要が入ります",
+      "number_of_words": 500,
+      "must_KW": ["キーワード1", "キーワード2"],
+      "memo": "ここにheadline1のメモが入ります"
+    },
+    "headline2": {
+      "entry": "h1, h2, h3, h4, h5, h6のどれか",
+      "outline": "ここにheadline2の記事の概要が入ります",
+      "number_of_words": 450
+      // "must_KW" と "memo" はこのheadlineでは省略されている
+    },
+    // 他のheadlineも同様の構造
   }
 }
 '''
