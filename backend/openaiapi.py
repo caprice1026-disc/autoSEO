@@ -32,6 +32,22 @@ def seo_rival(content):
         print(f"SEO要点抽出中にエラーが発生しました: {e}")
         raise e
     
+def generate_seo_content(system_prompt, user_prompt):
+    try:
+        response = openai_api_call(
+            "gpt-4-1106-preview",
+            0,
+            [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            4000,  # リード文の最大トークン数を適宜設定
+            {"type": "text"}
+        )
+        return response
+    except Exception as e:
+        print(f"SEO要点抽出中にエラーが発生しました: {e}")
+        raise e
 
 
 

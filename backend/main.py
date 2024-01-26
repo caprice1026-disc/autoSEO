@@ -3,7 +3,7 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from openaiapi import seo_rival, openai_api_call
+from openaiapi import seo_rival, openai_api_call, generate_seo_content
 
 
 api_key = os.environ.get('GOOGLE_API_KEY')
@@ -100,20 +100,27 @@ def main(section1, section2):
     search_intent = section1['search_intent']
     goal = section1['goal']
     title = section1['title']
-    # section2の各内容を取得
-    entry = section2['entry']
-    headline = section2['headline']
-    outline = section2['outline']
-    number_of_words = section2['number_of_words']
-    must_KW = section2['must_KW']
-    memo = section2['memo']
-    # ここから下は、section2の内容を使ってコンテンツを作成する処理
     system_prompt = (
-    f'あなたは優秀なSEOライターです。"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
+    "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
+    f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
     f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
-    
     )
-    
+    # section2の各見出しに対して処理を行う
+    for headline_key, headline_value in section2.items():
+    # section2の各内容を取得
+        entry = section2['entry']
+        outline = section2['outline']
+        number_of_words = section2['number_of_words']
+        must_KW = section2['must_KW']
+        memo = section2['memo']
+    # ここから下は、section2の内容を使ってコンテンツを作成する処理
+
+    user_prompt = (
+        f'{entry}の部分の記事を作成します。記事の概要は"""{outline}"""で、文字数は"""{number_of_words}"""です。'
+        f'また、記事内に、{must_KW}を必ず含めてください。また、記事を書く際は、"""{memo}"""を意識した出力を行ってください。'
+    )
+    content = generate_seo_content(system_prompt, user_prompt)
+
 # ここから再帰的に各タグの内容を生成
 # その後組み立てて出力
 
