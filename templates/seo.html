@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>SEOライティングツール</title>
+</head>
+<body>
+
+    <div class="input-section">
+        <table>
+            <tr>
+                <td><label for="inputKeyword">キーワード入力欄:</label></td>
+                <td><input type="text" id="inputKeyword" name="inputKeyword"></td>
+            </tr>
+            <tr>
+                <td><label for="inputTarget">ターゲット読者入力欄:</label></td>
+                <td><input type="text" id="inputTarget" name="inputTarget"></td>
+            </tr>
+            <tr>
+                <td><label for="inputIntent">検索意図入力欄:</label></td>
+                <td><input type="text" id="inputIntent" name="inputIntent"></td>
+            </tr>
+            <tr>
+                <td><label for="inputGoal">ページのゴール入力欄:</label></td>
+                <td><input type="text" id="inputGoal" name="inputGoal"></td>
+            </tr>
+            <tr>
+                <td><label for="inputTitle">タイトル入力欄:</label></td>
+                <td><input type="text" id="inputTitle" name="inputTitle"></td>
+            </tr>
+            <tr>
+                <td><label for="inputDescription">ディスクプリクション入力欄:</label></td>
+                <td><input type="text" id="inputDescription" name="inputDescription"></td>
+            </tr>
+        </table>
+        <!-- 結果メッセージの要素 -->
+        <div class="result-message" id="resultMessage"></div>
+    </div>
+
+    <div class="header-section">
+        <table id="headerTable">
+            <tr>
+                <th>見出し</th>
+                <th>見出し入力欄</th>
+                <th>文字数</th>
+                <th>必須キーワード入力欄</th>
+                <th>メモ入力欄</th>
+            </tr>
+            <tr>
+                <td>
+                    <select id="headerSelect">
+                        <option value="h1">h1</option>
+                        <option value="h2">h2</option>
+                        <option value="h3">h3</option>
+                        <option value="h4">h4</option>
+                        <option value="h5">h5</option>
+                        <option value="h6">h6</option>
+                    </select>
+                </td>
+                <td><input type="text" id="headerInput" name="headerInput"></td>
+                <td><input type="number" min="1" max="600" id="charCount" name="charCount"></td>
+                <td><input type="text" id="requiredKeyword" name="requiredKeyword"></td>
+                <td><input type="text" id="memoInput" name="memoInput"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="output-container">
+        <button id="addTable" onclick="addTable()">+</button>
+        <button id="removeTable" onclick="removeTable()">-</button>
+    </div>
+
+    <div id="tablesContainer"></div>
+
+
+
+    <button type="button" onclick="submitForm()">送信</button>
+ <div class="output-frame" id="outputFrame"></div>
+    <script src="script.js"></script>
+</body>
+</html>
