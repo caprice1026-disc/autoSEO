@@ -1,3 +1,5 @@
+// script.js
+
 document.getElementById('addTable').addEventListener('click', addTable);
 document.getElementById('removeTable').addEventListener('click', removeTable);
 
@@ -7,12 +9,12 @@ function addTable() {
     newTable.innerHTML = '<tr><th>見出し</th><th>見出し入力欄</th><th>文字数</th><th>必須キーワード入力欄</th><th>メモ入力欄</th></tr>' +
         '<tr><td><select class="headerSelect"><option value="h1">h1</option><option value="h2">h2</option><option value="h3">h3</option><option value="h4">h4</option><option value="h5">h5</option><option value="h6">h6</option></select></td>' +
         '<td><input type="text" class="headerInput" name="headerInput"></td>' +
+        '<td><input type="text" class=headerInput" name="headerInput"></td>' +
         '<td><input type="number" min="1" max="600" class="charCount" name="charCount"></td>' +
         '<td><input type="text" class="requiredKeyword" name="requiredKeyword"></td>' +
         '<td><input type="text" class="memoInput" name="memoInput"></td></tr>';
     tablesContainer.appendChild(newTable);
 
-    
     var selects = newTable.getElementsByClassName('headerSelect');
     var inputs = newTable.getElementsByClassName('headerInput');
     var charCounts = newTable.getElementsByClassName('charCount');
@@ -37,5 +39,25 @@ function removeTable() {
 }
 
 function submitForm() {
+    var inputKeyword = document.getElementById('inputKeyword').value;
+    var inputTarget = document.getElementById('inputTarget').value;
+    var inputIntent = document.getElementById('inputIntent').value;
+    var inputGoal = document.getElementById('inputGoal').value;
+    var inputTitle = document.getElementById('inputTitle').value;
+    var inputDescription = document.getElementById('inputDescription').value;
 
+    var resultMessage = document.getElementById('resultMessage');
+    var resultMessageOutput = document.getElementById('resultMessageOutput');
+
+    if (inputKeyword === '' || inputTarget === '' || inputIntent === '' || inputGoal === '' || inputTitle === '' || inputDescription === '') {
+        resultMessage.textContent = '未入力の箇所があります';
+        resultMessage.classList.remove('result-success');
+        resultMessage.classList.add('result-error');
+        resultMessageOutput.textContent = '';
+    } else {
+        resultMessage.textContent = '送信されました';
+        resultMessage.classList.remove('result-error');
+        resultMessage.classList.add('result-success');
+        resultMessageOutput.textContent = '送信されました';
+    }
 }

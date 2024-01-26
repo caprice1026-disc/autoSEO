@@ -9,31 +9,35 @@
 <body>
 
     <div class="input-section">
-        <table class="form-table">
-            <!-- 
-                https://html-coding.co.jp/annex/dictionary/html/textarea/
-                テキストエリアの実装法はこれを参照！
-                これはフォームとかでよく使うだろうし、覚えておくといいと思う
-             -->
+        <table>
             <tr>
-                <td><input type="text" value=""></td>
+                <td><label for="inputKeyword">キーワード入力欄:</label></td>
+                <td><input type="text" id="inputKeyword" name="inputKeyword"></td>
             </tr>
             <tr>
-                <td><input type="text" value=""></td>
+                <td><label for="inputTarget">ターゲット読者入力欄:</label></td>
+                <td><input type="text" id="inputTarget" name="inputTarget"></td>
             </tr>
             <tr>
-                <td><input type="text" value=""></td>
+                <td><label for="inputIntent">検索意図入力欄:</label></td>
+                <td><input type="text" id="inputIntent" name="inputIntent"></td>
             </tr>
             <tr>
-                <td><input type="text" value=""></td>
+                <td><label for="inputGoal">ページのゴール入力欄:</label></td>
+                <td><input type="text" id="inputGoal" name="inputGoal"></td>
             </tr>
             <tr>
-                <td><input type="text" value=""></td>
+                <td><label for="inputTitle">タイトル入力欄:</label></td>
+                <td><input type="text" id="inputTitle" name="inputTitle"></td>
             </tr>
             <tr>
-                <td><input type="text" value=""></td>
+                <td><label for="inputDescription">ディスクプリクション入力欄:</label></td>
+                <td><input type="text" id="inputDescription" name="inputDescription"></td>
             </tr>
         </table>
+        <!-- 結果メッセージの要素 -->
+        <div class="result-message" id="resultMessage"></div>
+    </div>
 
     <div class="header-section">
         <table id="headerTable">
@@ -64,21 +68,16 @@
     </div>
 
     <div class="output-container">
-        <button id="addTable" onclick="addHeaderTable()">+</button>
-        <button id="removeTable" onclick="removeLastHeaderTable()">-</button>
+        <button id="addTable" onclick="addTable()">+</button>
+        <button id="removeTable" onclick="removeTable()">-</button>
     </div>
 
     <div id="tablesContainer"></div>
 
-    <div class="output-frame" id="outputFrame"></div>
+
 
     <button type="button" onclick="submitForm()">送信</button>
-    <div class="output-container">
-        <div class="output-frame" id="outputFrame"></div>
-    </div>
-
-    <button type="button" onclick="submitForm()">送信</button>
-
+ <div class="output-frame" id="outputFrame"></div>
     <script src="script.js"></script>
 </body>
 </html>
