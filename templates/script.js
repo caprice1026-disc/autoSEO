@@ -18,11 +18,11 @@ function addRow() {
                 <option value="h6">H6</option>
             </select>
         </td>
-        <td><textarea name="headerText[]"></textarea></td>
-        <td><textarea name="headerCharCount[]" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
-        <td><textarea name="headerSummary[]"></textarea></td>
-        <td><textarea name="headerKeywords[]"></textarea></td>
-        <td><textarea name="headerNotes[]"></textarea></td>
+        <td><textarea name="headerText"></textarea></td>
+        <td><textarea name="headerCharCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
+        <td><textarea name="headerSummary"></textarea></td>
+        <td><textarea name="headerKeywords"></textarea></td>
+        <td><textarea name="headerNotes"></textarea></td>
     `;
 }
 
