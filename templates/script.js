@@ -1,74 +1,67 @@
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('addRowButton').addEventListener('click', addRow);
+    document.getElementById('removeRowButton').addEventListener('click', removeRow);
+    document.getElementById('seoForm').addEventListener('submit', submitForm);
+});
+
 function addRow() {
-    const table2 = document.getElementById('table2');
-    const newRow = table2.insertRow(table2.rows.length);
-    for (let i = 0; i < 6; i++) {
-        const cell = newRow.insertCell(i);
-        if (i === 0) {
-            const select = document.createElement('select');
-            select.innerHTML = `
+    const table = document.getElementById('headerTable');
+    const newRow = table.insertRow();
+    newRow.innerHTML = `
+        <td>
+            <select name="headerLevel[]">
                 <option value="h1">H1</option>
                 <option value="h2">H2</option>
                 <option value="h3">H3</option>
                 <option value="h4">H4</option>
                 <option value="h5">H5</option>
                 <option value="h6">H6</option>
-            `;
-            cell.appendChild(select);
-        } else {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = '';
-            cell.appendChild(input);
-        }
-    }
+            </select>
+        </td>
+        <td><textarea name="headerText[]"></textarea></td>
+        <td><textarea name="headerCharCount[]" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
+        <td><textarea name="headerSummary[]"></textarea></td>
+        <td><textarea name="headerKeywords[]"></textarea></td>
+        <td><textarea name="headerNotes[]"></textarea></td>
+    `;
 }
 
 function removeRow() {
-    //ここに間違いがあって変な挙動になってるかも
-    const table2 = document.getElementById('table2');
-    if (table2.rows.length > 1) {
-        table2.deleteRow(table2.rows.length - 1);
+    const table = document.getElementById('headerTable');
+    const rowCount = table.rows.length;
+    if (rowCount > 1) { // 最初の行を除いて削除
+        table.deleteRow(-1);
     }
 }
 
-function submitForm() {
-    let result = '';
-    const inputs = document.querySelectorAll('.form-container input, .form-container select');
-    inputs.forEach((input, index) => {
-        //resultに足す必要がある
-        result += 
+function submitForm(event) {
+    event.preventDefault();
+
+    const textAreas = document.querySelectorAll('#seoForm textarea');
+    const selects = document.querySelectorAll('#seoForm select');
+    let isValid = true;
+    let message = '';
+
+    textAreas.forEach(textArea => {
+        if (!textArea.value.trim()) {
+            isValid = false;
+        }
     });
 
-    document.getElementById('result').textContent = result;
-    document.getElementById('submit-message').textContent = '送信されました';
-}
+    selects.forEach(select => {
+        if (!select.value.trim()) {
+            isValid = false;
+        }
+    });
 
-// ↓最終的にはこういったデータ形式で送信するようにしたい。
+    const messageDiv = document.getElementById('message');
+    if (isValid) {
+        message = '送信されました';
+        messageDiv.style.color = 'green';
+    } else {
+        message = '未入力の箇所があります';
+        messageDiv.style.color = 'red';
+    }
 
-/*
-{
-  "section1": {
-    "keyword": ["サンプルキーワード1", "サンプルキーワード2"],
-    "expected_reader": "サンプル読者層",
-    "search_intent": "情報提供",
-    "goal": "読者の理解向上",
-    "title": "サンプルタイトル"
-  },
-  "section2": {
-    "headline1": {
-      "entry": "h1, h2, h3, h4, h5, h6のどれか",
-      "outline": "ここにheadline1の記事の概要が入ります",
-      "number_of_words": 500,
-      "must_KW": ["キーワード1", "キーワード2"],
-      "memo": "ここにheadline1のメモが入ります"
-    },
-    "headline2": {
-      "entry": "h1, h2, h3, h4, h5, h6のどれか",
-      "outline": "ここにheadline2の記事の概要が入ります",
-      "number_of_words": 450
-      // "must_KW" と "memo" はこのheadlineでは省略されている
-    },
-    // 他のheadlineも同様の構造
-  }
+    messageDiv.textContent = message;
 }
-*/
