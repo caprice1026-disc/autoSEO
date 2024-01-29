@@ -55,13 +55,72 @@ function submitForm(event) {
     });
 
     const messageDiv = document.getElementById('message');
-    if (isValid) {
-        message = '送信されました';
-        messageDiv.style.color = 'green';
-    } else {
+    if (!isValid) {
         message = '未入力の箇所があります';
         messageDiv.style.color = 'red';
+        messageDiv.textContent = message;
+        return;
     }
 
+    // データ収集と整形
+    const jsonData = collectFormData();
+
+    // データ送信
+    fetch('/submit', {
+        //POSTメソッドで送信
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+    // レスポンスのJSONを解析
+    .then(response => response.json())
+    .then(data => {
+        message = '送信されました';
+        messageDiv.style.color = 'green';
+        console.log('Success:', data);
+    })
+    // エラーが発見されたとき
+    .catch((error) => {
+        message = '送信中にエラーが発生しました';
+        messageDiv.style.color = 'red';
+        console.error('Error:', error);
+    });
+
     messageDiv.textContent = message;
+}
+
+// フォームのデータを収集して整形する用の関数
+function collectFormData() {
+    // section1のデータを収集
+    const section1 = {
+        inputKeyword: document.getElementById('inputKeyword').value.trim(),
+        inputTarget: document.getElementById('inputTarget').value.trim(),
+        inputIntent: document.getElementById('inputIntent').value.trim(),
+        inputGoal: document.getElementById('inputGoal').value.trim(),
+        inputTitle: document.getElementById('inputTitle').value.trim()
+    };
+
+    // section2のデータを収集
+    const section2 = {};
+    const headers = document.querySelectorAll('#headerTable tr');
+    headers.forEach((row, index) => {
+        if (index > 0) { // 最初のヘッダー行を無視
+            const headerData = {
+                entry: row.querySelector('select[name="headerLevel"]').value,
+                outline: row.querySelector('textarea[name="headerSummary"]').value.trim(),
+                number_of_words: parseInt(row.querySelector('textarea[name="headerCharCount"]').value.trim()),
+                must_KW: row.querySelector('textarea[name="headerKeywords"]').value.split(',').map(kw => kw.trim()),
+                memo: row.querySelector('textarea[name="headerNotes"]').value.trim()
+            };
+            // 空のフィールドは含めない
+            if (!headerData.must_KW.length) delete headerData.must_KW;
+            if (!headerData.memo) delete headerData.memo;
+
+            section2[`headline${index}`] = headerData;
+        }
+    });
+
+    return { section1, section2 };
 }
