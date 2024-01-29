@@ -87,7 +87,10 @@ def generate_seo_content(system_prompt, user_prompt):
         raise e
 
     
-def main(section1, section2):
+def main(json_data):
+    # section1の各内容を取得
+    section1 = json_data['section1']
+    section2 = json_data['section2']
     keywords = section1['keyword']
     results = {}
 

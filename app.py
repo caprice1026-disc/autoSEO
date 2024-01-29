@@ -7,8 +7,7 @@ import os
 import json
 from flask import Flask, request, jsonify, render_template
 from markupsafe import escape
-from main import process_json
-
+from backend.main import main
 app = Flask(__name__)
 
 @app.route('/')
@@ -20,7 +19,7 @@ def submit():
     try:
         json_data = request.get_json()
         print(json_data)
-        process_json(json_data)  # JSONデータを処理する関数を呼び出す
+        main(json_data)  # JSONデータを処理する関数を呼び出す
         return jsonify({"message": "JSON processed successfully"})
     except Exception as e:
         print(e)
