@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>SEOライティングツール</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<form id="seoForm">
+    <div class="input-section">
+        <!-- キーワード入力欄 (改行不可) -->
+        <label for="inputKeyword">キーワード入力欄:</label>
+        <input type="text" id="inputKeyword" name="inputKeyword"><br>
+
+        <!-- ターゲット読者入力欄 (改行可能) -->
+        <label for="inputTarget">ターゲット読者入力欄:</label>
+        <textarea id="inputTarget" name="inputTarget"></textarea><br>
+
+        <!-- 検索意図入力欄 (改行可能) -->
+        <label for="inputIntent">検索意図入力欄:</label>
+        <textarea id="inputIntent" name="inputIntent"></textarea><br>
+
+        <!-- ページのゴール入力欄 (改行可能) -->
+        <label for="inputGoal">ページのゴール入力欄:</label>
+        <textarea id="inputGoal" name="inputGoal"></textarea><br>
+
+        <!-- タイトル入力欄 (改行可能) -->
+        <label for="inputTitle">タイトル入力欄:</label>
+        <textarea id="inputTitle" name="inputTitle"></textarea><br>
+
+        <!-- ディスクリプション入力欄 (改行可能) -->
+        <label for="inputDescription">ディスクリプション入力欄:</label>
+        <textarea id="inputDescription" name="inputDescription"></textarea><br>
+    </div>
+
+    <!-- 見出し情報 -->
+    <div class="header-section">
+        <table id="headerTable">
+            <tr>
+                <th>見出し</th>
+                <th>見出しテキスト</th>
+                <th>文字数</th>
+                <th>記事概要</th>
+                <th>必須キーワード</th>
+                <th>メモ</th>
+            </tr>
+            <tr>
+                <td>
+                   
+                 <select name="headerLevel">
+                    <option value="h1">H1</option>
+                    <option value="h2">H2</option>
+                    <option value="h3">H3</option>
+                    <option value="h4">H4</option>
+                    <option value="h5">H5</option>
+                    <option value="h6">H6</option>
+                </select>
+            </td>
+            <td><textarea name="headerText[]"></textarea></td>
+            <td><textarea name="headerCharCount[]" oninput="this.value=this.value.replace(/[^o-600]/g,'');"></textarea></td>
+            <td><textarea name="headerSummary[]"></textarea></td>
+            <td><textarea name="headerKeywords[]"></textarea></td>
+            <td><textarea name="headerNotes[]"></textarea></td>
+        </tr>
+    </table>
+    
+        <button type="button" id="addRowButton">+</button>
+        <button type="button" id="removeRowButton">-</button>
+    </div>
+
+    <button type="submit">送信</button>
+</form>
+
+<div class="output-frame" id="outputFrame"></div>
+<div id="message"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
