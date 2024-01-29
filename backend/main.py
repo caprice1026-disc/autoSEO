@@ -88,16 +88,7 @@ def generate_seo_content(system_prompt, user_prompt):
 
     
 def main(section1, section2):
-    # section1のデータを取得
-    inputKeyword = section1['inputKeyword']
-    expected_reader = section1['inputTarget']
-    search_intent = section1['inputIntent']
-    goal = section1['inputGoal']
-    title = section1['inputTitle']
-
-    # section1のキーワードを分割してリスト化
-    keywords = [keyword.strip() for keyword in inputKeyword.split(',')]
-
+    keywords = section1['keyword']
     results = {}
 
     for keyword in keywords:
@@ -122,11 +113,15 @@ def main(section1, section2):
 
     seo_essense = seo_rival(results_content)
 
-    # SEOコンテンツ生成のためのシステムプロンプトを作成
+    # section1の各内容を取得
+    expected_reader = section1['expected_reader']
+    search_intent = section1['search_intent']
+    goal = section1['goal']
+    title = section1['title']
     system_prompt = (
-        "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
-        f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
-        f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
+    "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
+    f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
+    f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
     )
 
     # 各見出しのコンテンツを生成して保存する辞書
@@ -146,7 +141,6 @@ def main(section1, section2):
         user_prompt = (
             f'{entry}の部分の記事を作成します。記事の概要は"""{outline}"""で、文字数は"""{number_of_words}"""です。'
             f'記事内に、{"、".join(must_KW)}を必ず含めてください。記事を書く際は、"""{memo}"""を意識してください。'
-            F'これまでの記事の内容は以下の通りです。{previous_content}これらの内容を踏まえて、記事を作成してください。'
         )
 
         # 前の見出しのコンテンツを追加
@@ -161,6 +155,7 @@ def main(section1, section2):
 
         # 次の見出しの生成に現在のコンテンツを利用
         previous_content = generated_content
+
 
 # ここから再帰的に各タグの内容を生成
 # その後組み立てて出力
