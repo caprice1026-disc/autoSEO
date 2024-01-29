@@ -3,7 +3,7 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from openaiapi import seo_rival, openai_api_call
+from openaiapi import seo_rival, openai_api_call, generate_seo_content
 
 
 api_key = os.environ.get('GOOGLE_API_KEY')
@@ -69,6 +69,24 @@ def parse_content(content):
         print(f"コンテンツのパース中にエラーが発生しました: {e}")
         return ""
     
+def generate_seo_content(system_prompt, user_prompt):
+    try:
+        response = openai_api_call(
+            "gpt-4-1106-preview",
+            0,
+            [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            4000,  # リード文の最大トークン数を適宜設定
+            {"type": "text"}
+        )
+        return response
+    except Exception as e:
+        print(f"コンテンツ作成中にエラーが発生しました: {e}")
+        raise e
+
+    
 def main(section1, section2):
     keywords = section1['keyword']
     results = {}
@@ -100,19 +118,45 @@ def main(section1, section2):
     search_intent = section1['search_intent']
     goal = section1['goal']
     title = section1['title']
-    # section2の各内容を取得
-    entry = section2['entry']
-    headline = section2['headline']
-    outline = section2['outline']
-    number_of_words = section2['number_of_words']
-    must_KW = section2['must_KW']
-    memo = section2['memo']
-    # ここから下は、section2の内容を使ってコンテンツを作成する処理
-    system_prompt = {
-    f'あなたは優秀なSEOライターです。"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
+    system_prompt = (
+    "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
+    f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
     f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
-}
-    
+    )
+
+    # 各見出しのコンテンツを生成して保存する辞書
+    generated_contents = {}
+    # 前の見出しのコンテンツを保存する変数
+    previous_content = ""
+    # section2の各見出しに対して処理を行う
+    for headline_key, headline_value in section2.items():
+        # section2の各内容を取得
+        entry = headline_value['entry']
+        outline = headline_value['outline']
+        number_of_words = headline_value['number_of_words']
+        must_KW = headline_value.get('must_KW', [])
+        memo = headline_value.get('memo', '')
+
+        # ユーザープロンプトの生成
+        user_prompt = (
+            f'{entry}の部分の記事を作成します。記事の概要は"""{outline}"""で、文字数は"""{number_of_words}"""です。'
+            f'記事内に、{"、".join(must_KW)}を必ず含めてください。記事を書く際は、"""{memo}"""を意識してください。'
+        )
+
+        # 前の見出しのコンテンツを追加
+        if previous_content:
+            system_prompt += f"\n\n{previous_content}"
+
+        # SEOコンテンツを生成
+        generated_content = generate_seo_content(system_prompt, user_prompt)
+
+        # 生成されたコンテンツを保存
+        generated_contents[headline_key] = generated_content
+
+        # 次の見出しの生成に現在のコンテンツを利用
+        previous_content = generated_content
+
+
 # ここから再帰的に各タグの内容を生成
 # その後組み立てて出力
 
@@ -123,7 +167,7 @@ def main(section1, section2):
 
 
     
-# JSONデータの例
+# JSONデータの例。headline2のように、省略されている項目もある。headlineは各項目の見出しを表す。
 '''
 {
   "section1": {
@@ -134,12 +178,20 @@ def main(section1, section2):
     "title": "サンプルタイトル"
   },
   "section2": {
-    "entry": "サンプル項目",
-    "headline": "サンプル見出し",
-    "outline": "ここに概要が入ります",
-    "number_of_words": 500,
-    "must_KW": ["キーワード1", "キーワード2"],
-    "memo": "ここにメモが入ります"
+    "headline1": {
+      "entry": "h1, h2, h3, h4, h5, h6のどれか",
+      "outline": "ここにheadline1の記事の概要が入ります",
+      "number_of_words": 500,
+      "must_KW": ["キーワード1", "キーワード2"],
+      "memo": "ここにheadline1のメモが入ります"
+    },
+    "headline2": {
+      "entry": "h1, h2, h3, h4, h5, h6のどれか",
+      "outline": "ここにheadline2の記事の概要が入ります",
+      "number_of_words": 450
+      // "must_KW" と "memo" はこのheadlineでは省略されている
+    },
+    // 他のheadlineも同様の構造(3,4と続く)
   }
 }
 '''
