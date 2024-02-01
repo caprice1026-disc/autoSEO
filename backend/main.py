@@ -3,7 +3,7 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from openaiapi import seo_rival, openai_api_call, generate_seo_content
+from backend.openaiapi import seo_rival, openai_api_call, generate_seo_content
 
 
 api_key = os.environ.get('GOOGLE_API_KEY')
