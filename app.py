@@ -1,7 +1,3 @@
-import os
-import json
-import flask
-from flask import request, jsonify, Flask, render_template
 from flask_cors import CORS
 import os
 import json
