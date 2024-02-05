@@ -53,6 +53,25 @@ function removeRow() {
     }
 }
 
+const formData = {
+        keywords: document.getElementById('inputKeyword').value.split(',').map(kw => kw.trim()), // キーワードを配列に変換
+        targetReader: document.getElementById('inputTarget').value,
+        searchIntent: document.getElementById('inputIntent').value,
+        goal: document.getElementById('inputGoal').value,
+        title: document.getElementById('inputTitle').value,
+        description: document.getElementById('inputDescription').value,
+        headers: Array.from(document.querySelectorAll('#headerTable tr')).slice(1).map(tr => { // 最初の行はヘッダーなので除外
+            return {
+                level: tr.querySelector('select[name="headerLevel[]"]').value,
+                text: tr.querySelector('textarea[name="headerText"]').value,
+                charCount: tr.querySelector('textarea[name="headerCharCount"]').value,
+                summary: tr.querySelector('textarea[name="headerSummary"]').value,
+                keywords: tr.querySelector('textarea[name="headerKeywords"]').value,
+                notes: tr.querySelector('textarea[name="headerNotes"]').value
+            };
+        })
+    };
+
 function submitForm(event) {
     event.preventDefault();
 
