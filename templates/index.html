@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>SEOライティングツール</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- CSSファイルのリンク -->
 </head>
 <body>
 
@@ -76,6 +76,6 @@
 <div class="output-frame" id="outputFrame"></div>
 <div id="message"></div>
 
-<script src="script.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script> <!-- JavaScriptファイルのリンク --> 
 </body>
 </html>
