@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 import json
 from flask import Flask, request, jsonify, render_template, Response
-from main import main
+from backend.main import main, generate_seo_content
 
 app = Flask(__name__)
 CORS(app)  # CORSを有効にする
@@ -22,28 +22,16 @@ def submit():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
-    
+
 def generate_events():
-    # 実際のアプリケーションでは、ここでデータベースの変更をリッスンするか、
-    # 他の方法でリアルタイムデータを取得します。
-    # 以下はデモ用の静的なイベントストリームです。
     yield "data: {}\n\n".format(json.dumps({"message": "Event started"}))
-    # 例えば、外部APIからのレスポンスやアプリケーションの内部状態の更新など
+    # generate_seo_contentからのレスポンスをイベントストリームとしてクライアントに送信
+    for event_data in generate_seo_content("Example system prompt", "Example user prompt"):
+        # generate_seo_content関数から受け取ったデータをそのままクライアントに送信
+        yield event_data
 
 @app.route('/events')
 def events():
     return Response(generate_events(), mimetype='text/event-stream')
-
-def generate_events():
-    # 実際のアプリケーションでは、ここでデータベースの変更をリッスンするか、
-    # 他の方法でリアルタイムデータを取得します。
-    # 以下はデモ用の静的なイベントストリームです。
-    yield "data: {}\n\n".format(json.dumps({"message": "Event started"}))
-    # 例えば、外部APIからのレスポンスやアプリケーションの内部状態の更新など
-
-@app.route('/events')
-def events():
-    return Response(generate_events(), mimetype='text/event-stream')
-
 if __name__ == "__main__":
     app.run(debug=True)

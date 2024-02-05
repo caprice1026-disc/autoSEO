@@ -81,12 +81,14 @@ def generate_seo_content(system_prompt, user_prompt):
                 {"role": "user", "content": user_prompt}
             ],
             4000,  # リード文の最大トークン数を適宜設定
-            {"type": "text"}
+            {"type": "text"},
+            stream = True
         )
-        return response
+        for chunk in response:
+            yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}\n\n"
     except Exception as e:
-        print(f"コンテンツ作成中にエラーが発生しました: {e}")
-        raise e
+        yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
 
     
 def main(json_data):
