@@ -62,6 +62,26 @@ function submitForm(event) {
         message = '未入力の箇所があります';
         messageDiv.style.color = 'red';
     }
-
+fetch('/submit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+    })
+    
+    then(response => response.json())
+    .then(data => {
+        // 成功時の処理
+        document.getElementById('message').textContent = '送信に成功しました';
+        document.getElementById('message').style.color = 'green';
+    })
+    .catch(error => {
+        // エラー処理
+        document.getElementById('message').textContent = '送信に失敗しました';
+        document.getElementById('message').style.color = 'red';
+        console.error('送信エラー:', error);
+    });
+}
     messageDiv.textContent = message;
 }
