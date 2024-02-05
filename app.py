@@ -13,25 +13,25 @@ def index():
     return render_template('index.html')
 
 @app.route('/submit', methods=['POST'])
-def submit():
-    try:
-        json_data = request.get_json()
-        print(json_data)
-        main(json_data)  # JSONデータを処理する関数を呼び出す
-        return jsonify({"message": "JSON processed successfully"})
-    except Exception as e:
-        print(e)
-        return jsonify({"error": str(e)}), 500
-
-def generate_events():
-    yield "data: {}\n\n".format(json.dumps({"message": "Event started"}))
-    # generate_seo_contentからのレスポンスをイベントストリームとしてクライアントに送信
-    for event_data in generate_seo_content("Example system prompt", "Example user prompt"):
-        # generate_seo_content関数から受け取ったデータをそのままクライアントに送信
-        yield event_data
-
-@app.route('/events')
 def events():
-    return Response(generate_events(), mimetype='text/event-stream')
+    json_data = request.get_json()
+    system_prompt, user_prompts, _ = main(json_data)  # mainからプロンプトを取得
+
+    def generate():
+        # generate_seo_content関数からストリーミングされるコンテンツを送信
+        content_stream = generate_seo_content(system_prompt, user_prompts)
+        for content_chunk in content_stream:
+            yield f"data: {json.dumps({'content': content_chunk})}\n\n"
+
+    return Response(generate(), content_type='text/event-stream')
+
 if __name__ == "__main__":
     app.run(debug=True)
+
+'''app.pyのjson_data = request.get_json()以下を修正すること。具体的には
+json_data = request.get_json()をおこなったあと、section1を作成、その後はsection2からユーザープロンプトを生成する
+繰り返し処理を行うことで、ユーザープロンプトを生成することができる。
+そのように書き換えること。     
+
+
+'''

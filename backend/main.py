@@ -84,8 +84,10 @@ def generate_seo_content(system_prompt, user_prompt):
             {"type": "text"},
             stream = True
         )
-        for chunk in response:
-            yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}\n\n"
+        for chunk in response.iter_content():
+            if chunk:
+                data = json.loads(chunk.decode('utf-8').lstrip('data: '))
+                yield f"data: {json.dumps({'content': data['choices'][0]['delta']['content']})}\n\n"
     except Exception as e:
         yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
@@ -118,54 +120,41 @@ def main(json_data):
             results_content += f"{content}\n\n"
         results_content += "\n\n"
 
+    # system_promptの生成
     seo_essense = seo_rival(results_content)
-
-    # section1の各内容を取得
     expected_reader = section1['expected_reader']
     search_intent = section1['search_intent']
     goal = section1['goal']
     title = section1['title']
     system_prompt = (
-    "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
-    f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
-    f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
+        "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、"
+        f"すべてのSEOに関する知識を持っています。'{seo_essense}'を参考に、'{expected_reader}'向けの"
+        f"'{search_intent}'の検索意図に適したコンテンツを作成してください。コンテンツの目的は'{goal}'で、"
+        f"タイトルは'{title}'です。"
     )
 
-    # 各見出しのコンテンツを生成して保存する辞書
-    generated_contents = {}
-    # 前の見出しのコンテンツを保存する変数
+    # user_promptsの生成
+    user_prompts = []
     previous_content = ""
-    # section2の各見出しに対して処理を行う
     for headline_key, headline_value in section2.items():
-        # section2の各内容を取得
         entry = headline_value['entry']
         outline = headline_value['outline']
         number_of_words = headline_value['number_of_words']
         must_KW = headline_value.get('must_KW', [])
         memo = headline_value.get('memo', '')
 
-        # ユーザープロンプトの生成
         user_prompt = (
-            f'{entry}の部分の記事を作成します。記事の概要は"""{outline}"""で、文字数は"""{number_of_words}"""です。'
-            f'記事内に、{"、".join(must_KW)}を必ず含めてください。記事を書く際は、"""{memo}"""を意識してください。'
-            "下記にこれ以前のセクションの内容を添付するので、これと整合性を合わせて文章を生成してください。"
+            f"{entry}の部分の記事を作成します。記事の概要は'{outline}'で、文字数は'{number_of_words}'です。"
+            f"記事内に、{', '.join(must_KW)}を必ず含めてください。記事を書く際は、'{memo}'を意識してください。"
+            f"これ以前の見出しはこのようになっています。ない場合もあります。これに整合性を合わせて書いてください。"
         )
-
-        # 前の見出しのコンテンツを追加
         if previous_content:
             user_prompt += f"\n\n{previous_content}"
 
-        # SEOコンテンツを生成
-        generated_content = generate_seo_content(system_prompt, user_prompt)
+        user_prompts.append(user_prompt)
+    return system_prompt, user_prompts
 
-        # 生成されたコンテンツを保存
-        generated_contents[headline_key] = generated_content
-
-        # 次の見出しの生成に現在のコンテンツを利用
-        previous_content = generated_content
-
-
-
+# 
 
 
 
