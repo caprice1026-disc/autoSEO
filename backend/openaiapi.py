@@ -18,7 +18,7 @@ def openai_api_call(model, temperature, messages, max_tokens, response_format):
 def seo_rival(content):
     try:
         response = openai_api_call(
-        "gpt-4-1106-preview",
+        "gpt-4-turbo-preview",
         0,
         [
             {"role": "system", "content": "あなたは優秀なSEO分析コンサルタントです。提供された内容から、SEOの要点を抽出してください。"},
@@ -35,7 +35,7 @@ def seo_rival(content):
 def generate_seo_content(system_prompt, user_prompt):
     try:
         response = openai_api_call(
-            "gpt-4-1106-preview",
+            "gpt-4-turbo-preview",
             0,
             [
                 {"role": "system", "content": system_prompt},

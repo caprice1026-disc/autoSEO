@@ -3,36 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>SEOライティングツール</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- CSSファイルのリンク -->
 </head>
 <body>
 
 <form id="seoForm">
-    <div class="input-section">
-        <!-- キーワード入力欄 (改行不可) -->
-        <label for="inputKeyword">キーワード入力欄:</label>
-        <input type="text" id="inputKeyword" name="inputKeyword"><br>
+    <!-- キーワード入力欄 (改行不可、プレースホルダー付き) -->
+<label for="inputKeyword">キーワード入力欄:</label>
+<input type="text" id="inputKeyword" name="inputKeyword" placeholder="キーワード1, キーワード2"><br>
 
-        <!-- ターゲット読者入力欄 (改行可能) -->
-        <label for="inputTarget">ターゲット読者入力欄:</label>
-        <textarea id="inputTarget" name="inputTarget"></textarea><br>
+<!-- ターゲット読者入力欄 (改行可能、プレースホルダー付き) -->
+<label for="inputTarget">ターゲット読者入力欄:</label>
+<textarea id="inputTarget" name="inputTarget" placeholder="ターゲット読者の説明"></textarea><br>
 
-        <!-- 検索意図入力欄 (改行可能) -->
-        <label for="inputIntent">検索意図入力欄:</label>
-        <textarea id="inputIntent" name="inputIntent"></textarea><br>
+<!-- 検索意図入力欄 (改行可能、プレースホルダー付き) -->
+<label for="inputIntent">検索意図入力欄:</label>
+<textarea id="inputIntent" name="inputIntent" placeholder="検索意図の概要"></textarea><br>
 
-        <!-- ページのゴール入力欄 (改行可能) -->
-        <label for="inputGoal">ページのゴール入力欄:</label>
-        <textarea id="inputGoal" name="inputGoal"></textarea><br>
+<!-- ページのゴール入力欄 (改行可能、プレースホルダー付き) -->
+<label for="inputGoal">ページのゴール入力欄:</label>
+<textarea id="inputGoal" name="inputGoal" placeholder="ページの目標"></textarea><br>
 
-        <!-- タイトル入力欄 (改行可能) -->
-        <label for="inputTitle">タイトル入力欄:</label>
-        <textarea id="inputTitle" name="inputTitle"></textarea><br>
+<!-- タイトル入力欄 (改行可能、プレースホルダー付き) -->
+<label for="inputTitle">タイトル入力欄:</label>
+<textarea id="inputTitle" name="inputTitle" placeholder="記事のタイトル"></textarea><br>
 
-        <!-- ディスクリプション入力欄 (改行可能) -->
-        <label for="inputDescription">ディスクリプション入力欄:</label>
-        <textarea id="inputDescription" name="inputDescription"></textarea><br>
-    </div>
+<!-- ディスクリプション入力欄 (改行可能、プレースホルダー付き) -->
+<label for="inputDescription">ディスクリプション入力欄:</label>
+<textarea id="inputDescription" name="inputDescription" placeholder="記事の概要"></textarea><br>
+
+<!-- 見出し情報セクション内のプレースホルダー付きテキストエリア -->
 
     <!-- 見出し情報 -->
     <div class="header-section">
@@ -57,11 +57,12 @@
                     <option value="h6">H6</option>
                 </select>
             </td>
-            <td><textarea name="headerText"></textarea></td>
-            <td><textarea name="headerCharCount" oninput="this.value=this.value.replace(/[^o-600]/g,'');"></textarea></td>
-            <td><textarea name="headerSummary"></textarea></td>
-            <td><textarea name="headerKeywords"></textarea></td>
-            <td><textarea name="headerNotes"></textarea></td>
+            <td><textarea name="headerText" placeholder="見出しテキスト"></textarea></td>
+<td><textarea name="headerCharCount" placeholder="例: 120" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
+<td><textarea name="headerSummary" placeholder="記事の簡潔な要約"></textarea></td>
+<td><textarea name="headerKeywords" placeholder="SEOキーワード"></textarea></td>
+<td><textarea name="headerNotes" placeholder="その他のメモ"></textarea></td>
+
         </tr>
     </table>
     
@@ -75,6 +76,6 @@
 <div class="output-frame" id="outputFrame"></div>
 <div id="message"></div>
 
-<script src="script.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script> <!-- JavaScriptファイルのリンク --> 
 </body>
 </html>
