@@ -1,4 +1,4 @@
-function submitForm(event) {
+function submitForm(event) {)
     event.preventDefault(); // デフォルトのフォーム送信を防止
 
     const form = event.target;
