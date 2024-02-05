@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 import json
 from flask import Flask, request, jsonify, render_template, Response
-
+from main import main
 
 app = Flask(__name__)
 CORS(app)  # CORSを有効にする
