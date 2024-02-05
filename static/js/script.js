@@ -103,4 +103,4 @@ fetch('/submit', {
     });
 }
     messageDiv.textContent = message;
-}
+
