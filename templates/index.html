@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- CSSファイルのリンク -->
 </head>
 <body>
+
 <form id="seoForm">
     <!-- キーワード入力欄 (改行不可、プレースホルダー付き) -->
 <label for="inputKeyword">キーワード入力欄:</label>
@@ -71,7 +72,7 @@
 
     <button type="submit">送信</button>
 </form>
-<form action="/submit" method="POST">
+
 <div class="output-frame" id="outputFrame"></div>
 <div id="message"></div>
 
