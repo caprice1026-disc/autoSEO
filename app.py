@@ -3,8 +3,7 @@ from flask_cors import CORS
 import os
 import json
 from flask import Flask, request, jsonify, render_template, Response
-from backend.main import main, generate_seo_content
-
+from backend.main import process_json
 app = Flask(__name__)
 CORS(app)  # CORSを有効にする
 
@@ -13,17 +12,9 @@ def index():
     return render_template('index.html')
 
 @app.route('/submit', methods=['POST'])
-def events():
+def submit():
     json_data = request.get_json()
-    system_prompt, user_prompts, _ = main(json_data)  # mainからプロンプトを取得
-
-    def generate():
-        # generate_seo_content関数からストリーミングされるコンテンツを送信
-        content_stream = generate_seo_content(system_prompt, user_prompts)
-        for content_chunk in content_stream:
-            yield f"data: {json.dumps({'content': content_chunk})}\n\n"
-
-    return Response(generate(), content_type='text/event-stream')
+    return Response(process_json(json_data), content_type='text/event-stream')
 
 if __name__ == "__main__":
     app.run(debug=True)

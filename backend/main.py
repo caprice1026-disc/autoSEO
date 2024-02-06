@@ -13,10 +13,27 @@ def process_json(json_data):
     try:
         section1 = json_data['section1']
         section2 = json_data['section2']
-        main(section1, section2)
+        system_prompt, user_prompts = main(section1, section2)
+        previous_content = ""
+
+        for user_prompt in user_prompts:
+            # generate_seo_content関数からストリーミングされるコンテンツを送信
+            content_stream = generate_seo_content(system_prompt, user_prompt)
+            for content_chunk in content_stream:
+                yield f"data: {json.dumps({'content': content_chunk})}\n\n"
+                previous_content += content_chunk
+
+            # 次のユーザープロンプトに前のコンテンツを追加
+            system_prompt = update_system_prompt(system_prompt, previous_content)
+
     except Exception as e:
         print(e)
-        raise e  # 例外を再度発生させる
+        yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+def update_system_prompt(system_prompt, previous_content):
+    # 既存のsystem_promptにprevious_contentを追加して更新する
+    updated_prompt = f"{system_prompt}\n{previous_content}"
+    return updated_prompt
     
 def google_search(query, api_key, cse_id, num_results=3):
     url = "https://www.googleapis.com/customsearch/v1"
@@ -135,7 +152,6 @@ def main(json_data):
 
     # user_promptsの生成
     user_prompts = []
-    previous_content = ""
     for headline_key, headline_value in section2.items():
         entry = headline_value['entry']
         outline = headline_value['outline']
@@ -148,8 +164,6 @@ def main(json_data):
             f"記事内に、{', '.join(must_KW)}を必ず含めてください。記事を書く際は、'{memo}'を意識してください。"
             f"これ以前の見出しはこのようになっています。ない場合もあります。これに整合性を合わせて書いてください。"
         )
-        if previous_content:
-            user_prompt += f"\n\n{previous_content}"
 
         user_prompts.append(user_prompt)
     return system_prompt, user_prompts
