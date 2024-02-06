@@ -16,7 +16,16 @@ def process_json(json_data):
         system_prompt, user_prompts = main(section1, section2)
         previous_content = ""
 
-        for user_prompt in user_prompts:
+        for index, user_prompt in enumerate(user_prompts):
+            # section2から対応する見出し情報を取得
+            headline_key = f'headline{index + 1}'
+            headline_info = section2.get(headline_key)
+            if headline_info:
+                entry = headline_info['entry']
+                headline_text = headline_info['headline_text']
+                # 見出しテキストを出力
+                yield f"data: {json.dumps({'content': f'<{entry}>{headline_text}</{entry}>'})}\n\n"
+
             # generate_seo_content関数からストリーミングされるコンテンツを送信
             content_stream = generate_seo_content(system_prompt, user_prompt)
             for content_chunk in content_stream:
