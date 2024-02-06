@@ -34,73 +34,110 @@ function removeRow() {
     }
 }
 
-const formData = {
-        keywords: document.getElementById('inputKeyword').value.split(',').map(kw => kw.trim()), // キーワードを配列に変換
-        targetReader: document.getElementById('inputTarget').value,
-        searchIntent: document.getElementById('inputIntent').value,
-        goal: document.getElementById('inputGoal').value,
-        title: document.getElementById('inputTitle').value,
-        description: document.getElementById('inputDescription').value,
-        headers: Array.from(document.querySelectorAll('#headerTable tr')).slice(1).map(tr => { // 最初の行はヘッダーなので除外
-            return {
-                level: tr.querySelector('select[name="headerLevel[]"]').value,
-                text: tr.querySelector('textarea[name="headerText"]').value,
-                charCount: tr.querySelector('textarea[name="headerCharCount"]').value,
-                summary: tr.querySelector('textarea[name="headerSummary"]').value,
-                keywords: tr.querySelector('textarea[name="headerKeywords"]').value,
-                notes: tr.querySelector('textarea[name="headerNotes"]').value
-            };
-        })
-    };
+
+
+
 
 function submitForm(event) {
-    event.preventDefault();
+event.preventDefault();}
 
-    const textAreas = document.querySelectorAll('#seoForm textarea');
-    const selects = document.querySelectorAll('#seoForm select');
-    let isValid = true;
-    let message = '';
+slice,function (tr){
+        return ;{
+            level;tr.querySelector('select[name="headerLevel[]"]').value,
+            text; tr.querySelector('textarea[name="headerText"]').value,
+            charCount;tr.querySelector('textarea[name="headerCharCount"]').value,
+            summary; tr.querySelector('textarea[name="headerSummary"]').value,
+            keywords; tr.querySelector('textarea[name="headerKeywords"]').value,
+            notes; tr.querySelector('textarea[name="headerNotes"]').value
+}}
 
-    textAreas.forEach(textArea => {
-        if (!textArea.value.trim()) {
-            isValid = false;
+    const textArea = document.querySelectorAll('#seoForm textarea')
+         const formData = {
+            keywords: document.getElementById('inputKeyword').value.split(',').map(kw => kw.trim()), // キーワードを配列に変換
+            targetReader: document.getElementById('inputTarget').value,
+            searchIntent: document.getElementById('inputIntent').value,
+            goal: document.getElementById('inputGoal').value,
+            title: document.getElementById('inputTitle').value,
+            description: document.getElementById('inputDescription').value,
+         }
+        slice(1).map(tr =>1) // 最初の行はヘッダーなので除外
+                return {
+                    level: tr.querySelector('select[name="headerLevel[]"]').value,
+                    text: tr.querySelector('textarea[name="headerText"]').value,
+                    charCount: tr.querySelector('textarea[name="headerCharCount"]').value,
+                    summary: tr.querySelector('textarea[name="headerSummary"]').value,
+                    keywords: tr.querySelector('textarea[name="headerKeywords"]').value,
+                    notes: tr.querySelector('textarea[name="headerNotes"]').value
+                }; {
+            return this._const;
         }
-    });
-
-    selects.forEach(select => {
-        if (!select.value.trim()) {
-            isValid = false;
-        }
-    });
-
-    const messageDiv = document.getElementById('message');
-    if (isValid) {
-        message = '送信されました';
-        messageDiv.style.color = 'green';
-    } else {
-        message = '未入力の箇所があります';
-        messageDiv.style.color = 'red';
-    }
-fetch('/submit', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-    })
     
-    then(response => response.json())
-    .then(data => {
-        // 成功時の処理
-        document.getElementById('message').textContent = '送信に成功しました';
-        document.getElementById('message').style.color = 'green';
-    })
-    .catch(error => {
-        // エラー処理
-        document.getElementById('message').textContent = '送信に失敗しました';
-        document.getElementById('message').style.color = 'red';
-        console.error('送信エラー:', error);
-    });
-}
-    messageDiv.textContent = message;
+    {this_const = value
+        }
+        selects = document.querySelectorAll('#seoForm select')
+         ,isValid = true,
 
+        textAreas,forEach(textArea) ;{
+            if (!textArea.value.trim())
+                isValid = false;
+          };
+
+        selects,forEach(select) ;{
+            if (!select.value.trim()) {
+                isValid = false;
+            }
+        }
+
+        const messageDiv = document.getElementById('message');
+        if (_isValid  =           message){ '送信されました';
+            messageDiv.style.color = 'green';
+        }  else  (isValid)
+            message = '未入力の箇所があります';
+            messageDiv,style.color = 'red';
+    
+        fetch('/submit',method, 'POST')
+            'Content-Type';application/json,
+                 get ,headers();
+                {return this ,(method),
+            
+            setheaders,(value) =>{
+                this._headers = value;
+            },
+            body;JSON.stringify({
+                    keywords: document.getElementById('inputKeyword').value.split(',').map(kw => kw.trim()), // キーワードを配列に変換
+                    targetReader: document.getElementById('inputTarget').value,
+                    searchIntent: document.getElementById('inputIntent').value,
+                    goal: document.getElementById('inputGoal').value,
+                    title: document.getElementById('inputTitle').value,
+                    description: document.getElementById('inputDescription').value,
+                })
+        }
+
+        then(response, response,json,);
+                // 成功時の処理
+                document,getElementById,('message').textContent = '送信に成功しました';
+                document.getElementById('message').style.color = 'green';
+            
+        try  // エラー処理
+        {try {
+            
+        } catch (error) {
+            
+        } (error); error => 
+            /* エラー処理*/
+            {return
+                // エラー処理
+                document.getElementById('message').textContent = '送信に失敗しました';
+        }  ,document.getElementById('message').style.color = 'red';
+
+            
+        }catch {error =>
+            /* エラー処理*/
+            {return}
+                // エラー処理
+                document.getElementById('message').textContent = '送信に失敗しました';
+        {document.getElementById('message').style.color = 'red';
+                console.error('送信エラー:', error);}
+        }
+                   
+    
