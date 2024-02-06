@@ -3,45 +3,13 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from backend.openaiapi import seo_rival, openai_api_call, generate_seo_content
-
+from backend.openaiapi import seo_rival, openai_api_call
 
 api_key = os.environ.get('GOOGLE_API_KEY')
 cse_id = os.environ.get('GOOGLE_CSE_ID')
 
-def process_json(json_data):
-    try:
-        section1 = json_data['section1']
-        section2 = json_data['section2']
-        system_prompt, user_prompts = main(section1, section2)
-        previous_content = ""
-
-        for index, user_prompt in enumerate(user_prompts):
-            # section2から対応する見出し情報を取得
-            headline_key = f'headline{index + 1}'
-            headline_info = section2.get(headline_key)
-            if headline_info:
-                entry = headline_info['entry']
-                headline_text = headline_info['headline_text']
-                # 見出しテキストを出力
-                yield f"data: {json.dumps({'content': f'<{entry}>{headline_text}</{entry}>'})}\n\n"
-
-            # generate_seo_content関数からストリーミングされるコンテンツを送信
-            content_stream = generate_seo_content(system_prompt, user_prompt)
-            for content_chunk in content_stream:
-                yield f"data: {json.dumps({'content': content_chunk})}\n\n"
-                previous_content += content_chunk
-
-            # 次のユーザープロンプトに前のコンテンツを追加
-            system_prompt = update_system_prompt(system_prompt, previous_content)
-
-    except Exception as e:
-        print(e)
-        yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
 def update_system_prompt(system_prompt, previous_content):
-    # 既存のsystem_promptにprevious_contentを追加して更新する
-    updated_prompt = f"{system_prompt}\n{previous_content}"
+    updated_prompt = f"{system_prompt}\n\n{previous_content}"
     return updated_prompt
     
 def google_search(query, api_key, cse_id, num_results=3):
@@ -100,7 +68,7 @@ def parse_content(content):
 def generate_seo_content(system_prompt, user_prompt):
     try:
         response = openai_api_call(
-            "gpt-4-1106-preview",
+            "gpt-4-turbo-preview",
             0,
             [
                 {"role": "system", "content": system_prompt},
@@ -110,24 +78,32 @@ def generate_seo_content(system_prompt, user_prompt):
             {"type": "text"},
             stream = True
         )
-        for chunk in response.iter_content():
-            if chunk:
-                data = json.loads(chunk.decode('utf-8').lstrip('data: '))
-                yield f"data: {json.dumps({'content': data['choices'][0]['delta']['content']})}\n\n"
+ # send_streamed_content 関数を呼び出してストリームを処理
+        return send_streamed_content(response.iter_content())
     except Exception as e:
         yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
 
+def send_streamed_content(content_stream):
+    try:
+        for content_chunk in content_stream:
+            content_data = json.loads(content_chunk.decode('utf-8').lstrip('data: '))
+            yield f"data: {json.dumps({'content': content_data['choices'][0]['delta']['content']})}\n\n"
+            if content_data.get('choices')[0].get('finish_reason') == "stop":
+                break
+    except Exception as e:
+        yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
     
 def main(json_data):
-    # section1の各内容を取得
-    section1 = json_data['section1']
-    section2 = json_data['section2']
-    keywords = section1['keyword']
-    results = {}
+    try:
+        # section1の各内容を取得
+        section1 = json_data['section1']
+        keywords = section1['keyword']
+        results = {}
 
-    for keyword in keywords:
-        urls = google_search(keyword, api_key, cse_id)
+        for keyword in keywords:
+            urls = google_search(keyword, api_key, cse_id)
         contents = []
 
         for url in urls:
@@ -138,44 +114,61 @@ def main(json_data):
 
             results[url] = contents
 
-    # 結果を文字列として組み立て
-    results_content = ""
-    for url, content_list in results.items():
-        results_content += f"URL: {url}\n"
-        for content in content_list:
-            results_content += f"{content}\n\n"
-        results_content += "\n\n"
+        # 結果を文字列として組み立て
+        results_content = ""
+        for url, content_list in results.items():
+            results_content += f"URL: {url}\n"
+            for content in content_list:
+                results_content += f"{content}\n\n"
+            results_content += "\n\n"
 
-    # system_promptの生成
-    seo_essense = seo_rival(results_content)
-    expected_reader = section1['expected_reader']
-    search_intent = section1['search_intent']
-    goal = section1['goal']
-    title = section1['title']
-    system_prompt = (
+        # system_promptの生成
+        seo_essense = seo_rival(results_content)
+        expected_reader = section1['expected_reader']
+        search_intent = section1['search_intent']
+        goal = section1['goal']
+        title = section1['title']
+        system_prompt = (
         "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、"
         f"すべてのSEOに関する知識を持っています。'{seo_essense}'を参考に、'{expected_reader}'向けの"
         f"'{search_intent}'の検索意図に適したコンテンツを作成してください。コンテンツの目的は'{goal}'で、"
         f"タイトルは'{title}'です。"
-    )
+        )
+        return system_prompt
+    except Exception as e:
+        print(e)
+        return "エラーが発生しました。"
+
 
     # user_promptsの生成
-    user_prompts = []
-    for headline_key, headline_value in section2.items():
-        entry = headline_value['entry']
-        outline = headline_value['outline']
-        number_of_words = headline_value['number_of_words']
-        must_KW = headline_value.get('must_KW', [])
-        memo = headline_value.get('memo', '')
+        user_prompts = []
+        previous_content = ""
+        for index, (headline_key, headline_value) in enumerate(section2.items()):
+            entry = headline_value['entry']
+            outline = headline_value['outline']
+            number_of_words = headline_value['number_of_words']
+            must_KW = headline_value.get('must_KW', [])
+            memo = headline_value.get('memo', '')
 
-        user_prompt = (
+            user_prompt = (
             f"{entry}の部分の記事を作成します。記事の概要は'{outline}'で、文字数は'{number_of_words}'です。"
             f"記事内に、{', '.join(must_KW)}を必ず含めてください。記事を書く際は、'{memo}'を意識してください。"
             f"これ以前の見出しはこのようになっています。ない場合もあります。これに整合性を合わせて書いてください。"
-        )
+            )
 
-        user_prompts.append(user_prompt)
-    return system_prompt, user_prompts
+            content_stream = generate_seo_content(system_prompt, user_prompt)
+            # send_streamed_content 関数を呼び出してストリームを処理
+            for content_chunk in content_stream:
+                content_data = json.loads(content_chunk.decode('utf-8').lstrip('data: '))
+                content = content_data['choices'][0]['delta']['content']
+                previous_content += content
+                yield f"data: {json.dumps({'content': f'<{entry}>{content}</{entry}>'})}\n\n"
+                if content_data.get('choices')[0].get('finish_reason') == "stop":
+                    break  
+
+    except Exception as e:
+        print(e)
+        yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
 # 
 
@@ -209,9 +202,9 @@ def main(json_data):
       "headline_text": "見出し2のテキスト",
       "outline": "見出し2の記事では、キーワード選定の戦略に焦点を当てます",
       "number_of_words": 450
-      // "must_KW" と "memo" はこのheadlineでは省略されている
+      # "must_KW" と "memo" はこのheadlineでは省略されている
     }
-    // 他のheadlineも同様の構造(3,4と続く)
+    # 他のheadlineも同様の構造(3,4と続く)
   }
 }
 '''
