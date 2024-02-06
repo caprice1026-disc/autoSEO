@@ -1,9 +1,8 @@
 import json
-import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from backend.openaiapi import seo_rival, openai_api_call
+from backend.openaiapi import seo_rival
 
 api_key = os.environ.get('GOOGLE_API_KEY')
 cse_id = os.environ.get('GOOGLE_CSE_ID')
@@ -65,36 +64,6 @@ def parse_content(content):
         print(f"コンテンツのパース中にエラーが発生しました: {e}")
         return ""
     
-def generate_seo_content(system_prompt, user_prompt):
-    try:
-        response = openai_api_call(
-            "gpt-4-turbo-preview",
-            0,
-            [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            4000,  # リード文の最大トークン数を適宜設定
-            {"type": "text"},
-            stream = True
-        )
- # send_streamed_content 関数を呼び出してストリームを処理
-        return send_streamed_content(response.iter_content())
-    except Exception as e:
-        yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
-
-def send_streamed_content(content_stream):
-    try:
-        for content_chunk in content_stream:
-            content_data = json.loads(content_chunk.decode('utf-8').lstrip('data: '))
-            yield f"data: {json.dumps({'content': content_data['choices'][0]['delta']['content']})}\n\n"
-            if content_data.get('choices')[0].get('finish_reason') == "stop":
-                break
-    except Exception as e:
-        yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
-    
 def main(json_data):
     try:
         # section1の各内容を取得
@@ -138,40 +107,6 @@ def main(json_data):
     except Exception as e:
         print(e)
         return "エラーが発生しました。"
-
-
-    # user_promptsの生成
-        user_prompts = []
-        previous_content = ""
-        for index, (headline_key, headline_value) in enumerate(section2.items()):
-            entry = headline_value['entry']
-            outline = headline_value['outline']
-            number_of_words = headline_value['number_of_words']
-            must_KW = headline_value.get('must_KW', [])
-            memo = headline_value.get('memo', '')
-
-            user_prompt = (
-            f"{entry}の部分の記事を作成します。記事の概要は'{outline}'で、文字数は'{number_of_words}'です。"
-            f"記事内に、{', '.join(must_KW)}を必ず含めてください。記事を書く際は、'{memo}'を意識してください。"
-            f"これ以前の見出しはこのようになっています。ない場合もあります。これに整合性を合わせて書いてください。"
-            )
-
-            content_stream = generate_seo_content(system_prompt, user_prompt)
-            # send_streamed_content 関数を呼び出してストリームを処理
-            for content_chunk in content_stream:
-                content_data = json.loads(content_chunk.decode('utf-8').lstrip('data: '))
-                content = content_data['choices'][0]['delta']['content']
-                previous_content += content
-                yield f"data: {json.dumps({'content': f'<{entry}>{content}</{entry}>'})}\n\n"
-                if content_data.get('choices')[0].get('finish_reason') == "stop":
-                    break  
-
-    except Exception as e:
-        print(e)
-        yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
-# 
-
 
 
             
