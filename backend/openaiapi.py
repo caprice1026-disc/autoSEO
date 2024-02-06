@@ -6,10 +6,10 @@ OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 client = OpenAI()
 
 # OpenAI API呼び出し関数
-def openai_api_call(model, temperature, messages, max_tokens, response_format):
+def openai_api_call(model, temperature, messages, max_tokens, response_format, stream=False):
     try:
         # OpenAI API呼び出しを行う
-        response = client.chat.completions.create(model=model, temperature=temperature, messages=messages, max_tokens=max_tokens, response_format=response_format)
+        response = client.chat.completions.create(model=model, temperature=temperature, messages=messages, max_tokens=max_tokens, response_format=response_format, stream=stream)
         return response.choices[0].message.content  # 辞書型アクセスから属性アクセスへ変更
     except Exception as e:
         print(f"OpenAI API呼び出し中にエラーが発生しました: {e}")
