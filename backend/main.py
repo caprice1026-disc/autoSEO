@@ -3,6 +3,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from backend.openaiapi import seo_rival
+from googleapiclient.discovery import build
 
 api_key = os.environ.get('GOOGLE_API_KEY')
 cse_id = os.environ.get('GOOGLE_CSE_ID')
@@ -12,17 +13,21 @@ def update_system_prompt(system_prompt, previous_content):
     return updated_prompt
     
 def google_search(query, api_key, cse_id, num_results=3):
-    url = "https://www.googleapis.com/customsearch/v1"
-    params = {
-        'q': query,
-        'cx': cse_id,
-        'key': api_key,
-        'num': num_results
-    }
-    response = requests.get(url, params=params)
-    result = response.json()
-    # 結果をリスト形式で返す。各要素は検索結果のURL
-    return [item['link'] for item in result.get('items', [])]
+    try:
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            'q': query,
+            'cx': cse_id,
+            'key': api_key,
+            'num': num_results
+        }
+        response = requests.get(url, params=params)
+        result = response.json()
+        # 結果をリスト形式で返す。各要素は検索結果のURL
+        return [item['link'] for item in result.get('items', [])]
+    except requests.RequestException as e:
+        print(f"検索中にエラーが発生しました: {e}")
+        return []
 
 # URLからコンテンツを取得する関数
 def fetch_content_from_url(url):
@@ -34,7 +39,7 @@ def fetch_content_from_url(url):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         }
 
-        response = requests.get(url, headers=headers, timeout=30)
+        response = requests.get(url, headers=headers, timeout=10)
         content = response.text
 
         print(f"URLからコンテンツの取得が成功: {url}")
@@ -73,15 +78,15 @@ def main(json_data):
 
         for keyword in keywords:
             urls = google_search(keyword, api_key, cse_id)
-        contents = []
+            for url in urls:
+                content = fetch_content_from_url(url)
+                if content:
+                    parsed_content = parse_content(content)  # コンテンツをパース
+                    if url not in results:
+                        results[url] = [parsed_content]  # 新しいURLの場合、リストを初期化して追加
+                    else:
+                        results[url].append(parsed_content)  # 既存のURLの場合、コンテンツをリストに追加
 
-        for url in urls:
-            content = fetch_content_from_url(url)
-            if content:
-                parsed_content = parse_content(content)
-                contents.append(parsed_content)
-
-            results[url] = contents
 
         # 結果を文字列として組み立て
         results_content = ""

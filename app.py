@@ -1,12 +1,13 @@
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, render_template, Response
 from flask_cors import CORS
 import os
 import json
 from backend.main import main
-app = Flask(__name__)
-CORS(app)  # CORSを有効にする
 from backend.openaiapi import openai_api_call
 
+
+app = Flask(__name__)
+CORS(app)  # CORSを有効にする
 
 @app.route('/')
 def index():
