@@ -77,4 +77,27 @@ button {
     color: red;
     border-color: red;
 }
+@media screen and (max-width: 768px) {
+    input[type="text"],
+    textarea,
+    select {
+        width: 100%; /* スマホ画面では入力フィールドを幅いっぱいに広げます */
+        padding: 12px; /* タッチ操作を考慮して少し大きめのパディングにします */
+        font-size: 18px; /* スマホでの読みやすさを考慮してフォントサイズを大きくします */
+    }
+
+    .button-container,
+    .output-frame {
+        width: 100%; /* ボタンや出力フレームも幅いっぱいに広げます */
+    }
+
+    .output-frame {
+        height: auto; /* 内容に合わせて高さを自動調整します */
+        padding: 20px; /* タッチ操作を考慮してパディングを増やします */
+    }
+
+    /* その他、スマホ表示に合わせたスタイル調整 */
+    body {
+        margin: 10px; /* スマホ表示では余白を少し減らします */
+    }
 
