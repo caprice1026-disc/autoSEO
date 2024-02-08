@@ -12,7 +12,7 @@ def update_system_prompt(system_prompt, previous_content):
     updated_prompt = f"{system_prompt}\n\n{previous_content}"
     return updated_prompt
     
-def google_search(query, api_key, cse_id, num_results=3):
+def google_search(query, api_key=api_key, cse_id=cse_id, num_results=3):
     try:
         url = "https://www.googleapis.com/customsearch/v1"
         params = {

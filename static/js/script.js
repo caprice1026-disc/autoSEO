@@ -71,30 +71,31 @@ function submitForm(event) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        return response.json();
-    })
-    .then(data => {
-        document.getElementById('message').textContent = '送信に成功しました';
+        // Start listening to the stream from the server
+        const eventSource = new EventSource('/stream_seo');
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const outputFrame = document.getElementById('outputFrame');
+            // If there is content, append it to the output frame
+            if (data.content) {
+                const p = document.createElement('p');
+                p.textContent = data.content;
+                outputFrame.appendChild(p);
+            }
+            // If there is an error, display it and close the event source
+            if (data.error) {
+                document.getElementById('message').textContent = data.error;
+                document.getElementById('message').style.color = 'red';
+                eventSource.close();
+            }
+        };
+        document.getElementById('message').textContent = '送信に成功しました。コンテンツをストリーミングしています...';
         document.getElementById('message').style.color = 'green';
     })
     .catch(error => {
-        document.getElementById('message').textContent = '送信に失敗しました';
+        document.getElementById('message').textContent = '送信に失敗しました: ' + error.message;
         document.getElementById('message').style.color = 'red';
         console.error('送信エラー:', error);
     });
 }
-
-// サーバーからのイベントをリッスンする
-const eventSource = new EventSource('/submit');
-eventSource.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    const outputFrame = document.getElementById('outputFrame');
-    // contentが存在する場合、output-frameに追加する
-    if (data.content) {
-        const p = document.createElement('p');
-        p.textContent = data.content;
-        outputFrame.appendChild(p);
-    }
-};
-                   
     
