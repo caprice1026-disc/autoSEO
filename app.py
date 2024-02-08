@@ -7,6 +7,7 @@ from backend.openaiapi import openai_api_call
 
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 CORS(app)  # CORSを有効にする
 
 @app.route('/')
