@@ -25,7 +25,7 @@ def generate_seo_content(system_prompt, user_prompt):
             ],
             4000,  # リード文の最大トークン数を適宜設定
             {"type": "text"},
-            stream = True
+            stream = False
         )
         # ストリーム処理を直接返す
         return response.iter_content()
@@ -72,8 +72,10 @@ def stream_seo():
                     f"記事内に、{', '.join(keywords)}を必ず含めてください。記事を書く際は、'{notes}'を意識してください。"
                     f"これ以前の内容はこのようになっています。'{previous_content}'これに整合性を合わせて書いてください。"
                 )
+                # ここまでは問題なく動いているはず
                 # OpenAI APIを呼び出して、SEO要点を生成
                 seo_content = generate_seo_content(system_prompt, user_prompt)
+                print(seo_content)
                 for content_chunk in seo_content:
                     content_data = json.loads(content_chunk.decode('utf-8').lstrip('data: '))
                     if 'content' in content_data['choices'][0]['delta']:
