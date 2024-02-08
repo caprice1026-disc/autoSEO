@@ -18,11 +18,11 @@ function addRow() {
                 <option value="h6">H6</option>
             </select>
         </td>
-        <td><textarea name="headerText"></textarea></td>
-        <td><textarea name="headerCharCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
-        <td><textarea name="headerSummary"></textarea></td>
-        <td><textarea name="headerKeywords"></textarea></td>
-        <td><textarea name="headerNotes"></textarea></td>
+        <td><textarea name="headerText[]"></textarea></td>
+        <td><textarea name="headerCharCount[]" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
+        <td><textarea name="headerSummary[]"></textarea></td>
+        <td><textarea name="headerKeywords[]"></textarea></td>
+        <td><textarea name="headerNotes[]"></textarea></td>
     `;
 }
 
@@ -40,11 +40,11 @@ function submitForm(event) {
     Array.from(document.querySelectorAll('#headerTable tr')).slice(1).forEach((tr, index) => {
         headers[`headline${index + 1}`] = {
             level: tr.querySelector('select[name="headerLevel[]"]').value,
-            text: tr.querySelector('textarea[name="headerText"]').value,
-            charCount: tr.querySelector('textarea[name="headerCharCount"]').value,
-            summary: tr.querySelector('textarea[name="headerSummary"]').value,
-            keywords: tr.querySelector('textarea[name="headerKeywords"]').value.split(',').map(kw => kw.trim()),
-            notes: tr.querySelector('textarea[name="headerNotes"]').value
+            text: tr.querySelector('textarea[name="headerText[]"]').value,
+            charCount: tr.querySelector('textarea[name="headerCharCount[]"]').value,
+            summary: tr.querySelector('textarea[name="headerSummary[]"]').value,
+            keywords: tr.querySelector('textarea[name="headerKeywords[]"]').value.split(',').map(kw => kw.trim()),
+            notes: tr.querySelector('textarea[name="headerNotes[]"]').value
         };
     });
 

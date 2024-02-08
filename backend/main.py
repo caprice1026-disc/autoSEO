@@ -73,19 +73,18 @@ def main(json_data):
     try:
         # section1の各内容を取得
         section1 = json_data['section1']
-        keywords = section1['keyword']
+        keywords = section1['keywords']
         results = {}
 
         for keyword in keywords:
-            urls = google_search(keyword, api_key, cse_id)
+            urls = google_search(keyword)
             for url in urls:
-                content = fetch_content_from_url(url)
-                if content:
-                    parsed_content = parse_content(content)  # コンテンツをパース
-                    if url not in results:
+                if url not in results:
+                    content = fetch_content_from_url(url)
+                    if content:
+                        parsed_content = parse_content(content)  # コンテンツをパース
                         results[url] = [parsed_content]  # 新しいURLの場合、リストを初期化して追加
-                    else:
-                        results[url].append(parsed_content)  # 既存のURLの場合、コンテンツをリストに追加
+        # 既存のURLの場合、コンテンツを再度フェッチしてパースする必要はないため、この部分は削除します。
 
 
         # 結果を文字列として組み立て
@@ -98,8 +97,8 @@ def main(json_data):
 
         # system_promptの生成
         seo_essense = seo_rival(results_content)
-        expected_reader = section1['expected_reader']
-        search_intent = section1['search_intent']
+        expected_reader = section1['targetReader']
+        search_intent = section1['searchIntent']
         goal = section1['goal']
         title = section1['title']
         system_prompt = (
@@ -109,6 +108,7 @@ def main(json_data):
         f"タイトルは'{title}'です。"
         )
         return system_prompt
+        # ここまで問題なく動くのは確認済み
     except Exception as e:
         print(e)
         return "エラーが発生しました。"
@@ -120,31 +120,35 @@ def main(json_data):
     
 # JSONデータの例。headline2のように、省略されている項目もある。headlineは各項目の見出しを表す。
 '''
+現在のフロントエンドからの出力はこれ
+
 {
   "section1": {
-    "keyword": ["サンプルキーワード1", "サンプルキーワード2"],
-    "expected_reader": "サンプル読者層",
-    "search_intent": "情報提供",
-    "goal": "読者の理解向上",
-    "title": "サンプルタイトル"
+    "keywords": ["キーワード1", "キーワード2"],
+    "targetReader": "ターゲットリーダーの値",
+    "searchIntent": "検索意図の値",
+    "goal": "目標の値",
+    "title": "タイトルの値",
+    "description": "説明の値"
   },
   "section2": {
     "headline1": {
-      "entry": "h1",
-      "headline_text": "見出し1のテキスト",
-      "outline": "見出し1の記事はSEO最適化の重要性について説明します",
-      "number_of_words": 500,
-      "must_KW": ["SEO", "検索エンジン最適化"],
-      "memo": "読者がSEOの基本を理解できるようにする"
+      "level": "h1",
+      "text": "ヘッダーテキスト1",
+      "charCount": "文字数1",
+      "summary": "要約1",
+      "keywords": ["キーワードA", "キーワードB"],
+      "notes": "ノート1"
     },
     "headline2": {
-      "entry": "h2",
-      "headline_text": "見出し2のテキスト",
-      "outline": "見出し2の記事では、キーワード選定の戦略に焦点を当てます",
-      "number_of_words": 450
-      # "must_KW" と "memo" はこのheadlineでは省略されている
+      "level": "h2",
+      "text": "ヘッダーテキスト2",
+      "charCount": "文字数2",
+      "summary": "要約2",
+      "keywords": ["キーワードC", "キーワードD"],
+      "notes": "ノート2"
     }
-    # 他のheadlineも同様の構造(3,4と続く)
   }
 }
+
 '''

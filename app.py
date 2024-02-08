@@ -52,11 +52,12 @@ def stream_seo():
     if json_data is None:
         return jsonify(success=False, error="No JSON data found in session")
     # ここでストリーミング処理を実装
-    # 例えば、generate_seo_contentを呼び出してレスポンスをストリームする
     def generate():
+        system_prompt = ""
+        e = None
         try:
             system_prompt = main(json_data)
-        # JSONデータを処理して、user_promptを生成
+            # JSONデータを処理して、user_promptを生成
             section2 = json_data['section2']
             previous_content = ""
             for headline_key, headline_value in section2.items():
@@ -71,7 +72,7 @@ def stream_seo():
                     f"記事内に、{', '.join(keywords)}を必ず含めてください。記事を書く際は、'{notes}'を意識してください。"
                     f"これ以前の内容はこのようになっています。'{previous_content}'これに整合性を合わせて書いてください。"
                 )
-            # OpenAI APIを呼び出して、SEO要点を生成
+                # OpenAI APIを呼び出して、SEO要点を生成
                 seo_content = generate_seo_content(system_prompt, user_prompt)
                 for content_chunk in seo_content:
                     content_data = json.loads(content_chunk.decode('utf-8').lstrip('data: '))
@@ -83,8 +84,9 @@ def stream_seo():
                         yield f"data: {json.dumps({'content': content})}\n\n"
                     if content_data['choices'][0].get('finish_reason') == "stop":
                         break
-        except Exception as e:
+        except Exception as ex:
             # 例外が発生した場合の処理をここで直接実装
+            e = ex
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
     return Response(generate(), content_type='text/event-stream')
 
@@ -95,6 +97,37 @@ if __name__ == "__main__":
 ストリームのオンオフを定義するためには、openai_api_call関数にstream引数を追加し、他の引数と同様にデフォルト値を設定する。
 デフォルト値はFalseに設定する。この引数を呼び出し元の関数に渡すことで、ストリームのオンオフを制御することができる。
 値の入力がない場合は、デフォルト値が適用されるようにすること。
+
+現在のフロントエンドからの出力はこれ
+
+{
+  "section1": {
+    "keywords": ["キーワード1", "キーワード2"],
+    "targetReader": "ターゲットリーダーの値",
+    "searchIntent": "検索意図の値",
+    "goal": "目標の値",
+    "title": "タイトルの値",
+    "description": "説明の値"
+  },
+  "section2": {
+    "headline1": {
+      "level": "h1",
+      "text": "ヘッダーテキスト1",
+      "charCount": "文字数1",
+      "summary": "要約1",
+      "keywords": ["キーワードA", "キーワードB"],
+      "notes": "ノート1"
+    },
+    "headline2": {
+      "level": "h2",
+      "text": "ヘッダーテキスト2",
+      "charCount": "文字数2",
+      "summary": "要約2",
+      "keywords": ["キーワードC", "キーワードD"],
+      "notes": "ノート2"
+    }
+  }
+}
 
 
 '''

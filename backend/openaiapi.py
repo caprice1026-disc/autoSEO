@@ -2,7 +2,7 @@ from openai import OpenAI
 import os
 
 # Openai APIの設定
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI()
 
 # OpenAI API呼び出し関数
@@ -37,7 +37,8 @@ def seo_rival(content):
         4000,  # リード文の最大トークン数を適宜設定
         {"type": "text"}
         )
-        return response
+        seo_essence = ' '.join(response.split())
+        return seo_essence
     except Exception as e:
         print(f"SEO要点抽出中にエラーが発生しました: {e}")
         raise e
