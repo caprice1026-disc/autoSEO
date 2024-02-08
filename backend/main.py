@@ -3,7 +3,7 @@ import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from openaiapi import seo_rival, openai_api_call, generate_seo_content
+from backend.openaiapi import seo_rival, openai_api_call, generate_seo_content
 
 
 api_key = os.environ.get('GOOGLE_API_KEY')
@@ -18,7 +18,7 @@ def process_json(json_data):
         print(e)
         raise e  # 例外を再度発生させる
     
-def google_search(query, api_key, cse_id, num_results=10):
+def google_search(query, api_key, cse_id, num_results=3):
     url = "https://www.googleapis.com/customsearch/v1"
     params = {
         'q': query,
@@ -56,12 +56,14 @@ def parse_content(content):
         soup = BeautifulSoup(content, 'html.parser')
 
         # ヘッダー、フッター、スクリプト、スタイルの削除
-        for element in soup(['header', 'footer']):
+        for element in soup(['header', 'footer', 'style']):
             element.decompose()
 
+        # HTMLからテキストを取得し、余分な空白を削除
         text = soup.get_text()
         parsed_text = ' '.join(text.split())
 
+        # パースされたテキストの文字数を出力
         print(f"パースされたテキストの文字数: {len(parsed_text)}")
         return parsed_text
 
@@ -87,17 +89,11 @@ def generate_seo_content(system_prompt, user_prompt):
         raise e
 
     
-def main(section1, section2):
-    # section1のデータを取得
-    inputKeyword = section1['inputKeyword']
-    expected_reader = section1['inputTarget']
-    search_intent = section1['inputIntent']
-    goal = section1['inputGoal']
-    title = section1['inputTitle']
-
-    # section1のキーワードを分割してリスト化
-    keywords = [keyword.strip() for keyword in inputKeyword.split(',')]
-
+def main(json_data):
+    # section1の各内容を取得
+    section1 = json_data['section1']
+    section2 = json_data['section2']
+    keywords = section1['keyword']
     results = {}
 
     for keyword in keywords:
@@ -122,11 +118,15 @@ def main(section1, section2):
 
     seo_essense = seo_rival(results_content)
 
-    # SEOコンテンツ生成のためのシステムプロンプトを作成
+    # section1の各内容を取得
+    expected_reader = section1['expected_reader']
+    search_intent = section1['search_intent']
+    goal = section1['goal']
+    title = section1['title']
     system_prompt = (
-        "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
-        f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
-        f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
+    "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
+    f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
+    f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
     )
 
     # 各見出しのコンテンツを生成して保存する辞書
@@ -146,12 +146,12 @@ def main(section1, section2):
         user_prompt = (
             f'{entry}の部分の記事を作成します。記事の概要は"""{outline}"""で、文字数は"""{number_of_words}"""です。'
             f'記事内に、{"、".join(must_KW)}を必ず含めてください。記事を書く際は、"""{memo}"""を意識してください。'
-            F'これまでの記事の内容は以下の通りです。{previous_content}これらの内容を踏まえて、記事を作成してください。'
+            "下記にこれ以前のセクションの内容を添付するので、これと整合性を合わせて文章を生成してください。"
         )
 
         # 前の見出しのコンテンツを追加
         if previous_content:
-            system_prompt += f"\n\n{previous_content}"
+            user_prompt += f"\n\n{previous_content}"
 
         # SEOコンテンツを生成
         generated_content = generate_seo_content(system_prompt, user_prompt)
@@ -162,8 +162,7 @@ def main(section1, section2):
         # 次の見出しの生成に現在のコンテンツを利用
         previous_content = generated_content
 
-# ここから再帰的に各タグの内容を生成
-# その後組み立てて出力
+
 
 
 
@@ -184,18 +183,20 @@ def main(section1, section2):
   },
   "section2": {
     "headline1": {
-      "entry": "h1, h2, h3, h4, h5, h6のどれか",
-      "outline": "ここにheadline1の記事の概要が入ります",
+      "entry": "h1",
+      "headline_text": "見出し1のテキスト",
+      "outline": "見出し1の記事はSEO最適化の重要性について説明します",
       "number_of_words": 500,
-      "must_KW": ["キーワード1", "キーワード2"],
-      "memo": "ここにheadline1のメモが入ります"
+      "must_KW": ["SEO", "検索エンジン最適化"],
+      "memo": "読者がSEOの基本を理解できるようにする"
     },
     "headline2": {
-      "entry": "h1, h2, h3, h4, h5, h6のどれか",
-      "outline": "ここにheadline2の記事の概要が入ります",
+      "entry": "h2",
+      "headline_text": "見出し2のテキスト",
+      "outline": "見出し2の記事では、キーワード選定の戦略に焦点を当てます",
       "number_of_words": 450
       // "must_KW" と "memo" はこのheadlineでは省略されている
-    },
+    }
     // 他のheadlineも同様の構造(3,4と続く)
   }
 }
