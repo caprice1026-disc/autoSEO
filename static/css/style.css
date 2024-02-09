@@ -233,59 +233,6 @@ button:hover {
 }
 /* 既存のスタイル */
 
-@media screen and (max-width: 400px) (max-height: 768px)
-    /* スマートフォン表示のスタイル調整 */
-    #headerTable, 
-    #headerTable thead, 
-    #headerTable tbody, 
-    #headerTable th, 
-    #headerTable td, 
-    #headerTable tr { 
-        display: block; 
-    
-
-    #headerTable thead tr { 
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-
-    #headerTable td {
-        /* セルごとにマージンとパディングを設定 */
-        margin: 10px;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-        position: relative;
-        padding-left: 50%;
-        text-align: left;
-        
-    }
-
-    #headerTable td:before {
-        /* テーブルのヘッダーをセルのラベルとして表示 */
-        position: absolute;
-        left: 10px;
-        width: 45%; /* ラベルの幅を指定 */
-        padding-right: 10px; /* ラベルとテキストの間にスペースを設定 */
-        white-space: nowrap;
-        text-align: left;
-        font-weight: bold;
-    }
-
-    #headerTable td:before {
-        content: attr(data-label);
-    }
-
-    /* ボタンのサイズやパディングも必要に応じて調整 */
-    #addRowButton, 
-    #removeRowButton {
-        width: 100%;
-        margin: 10px 0; /* ボタンの上下のマージンを設定 */
-    }
-
-/* 既存のスタイル */
-
-/* 既存のスタイル */
 
 @media screen and (max-width: 768px) {
     /* スマートフォン表示のスタイル調整 */
