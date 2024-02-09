@@ -234,7 +234,7 @@ button:hover {
 /* 既存のスタイル */
 
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 400px) {
     /* スマートフォン表示のスタイル調整 */
     #headerTable, 
     #headerTable thead, 
@@ -259,6 +259,7 @@ button:hover {
         position: relative;
         padding-left: 50%;
         text-align: left;
+        width: 50%;
     }
 
     #headerTable td:before {
@@ -270,6 +271,8 @@ button:hover {
         white-space: nowrap;
         text-align: left;
         font-weight: bold;
+        padding:20px;
+        width: 50%;
     }
 
     #headerTable td:before {
