@@ -1,11 +1,18 @@
+// DOMが読み込まれた後にイベントリスナーを設定
 document.addEventListener('DOMContentLoaded', function() {
+    // 行の追加ボタンにイベントリスナーを追加
     document.getElementById('addRowButton').addEventListener('click', addRow);
-    document.getElementById('removeRowButton').addEventListener('click', removeRow);
-    document.getElementById('seoForm').addEventListener('submit', submitForm);
+
+    // 行の削除ボタンにイベントリスナーを追加
+    document.getElementById('removeRowButton').addEventListener('click', removeTableRow);
+
+    // フォーム送信時の検証イベントリスナーを追加
+    document.getElementById('seoForm').addEventListener('submit', validateForm);
 });
 
+// テーブル行を追加する関数
 function addRow() {
-    const table = document.getElementById('headerTable');
+    const table = document.getElementById('headerTable').getElementsByTagName('tbody')[0];
     const newRow = table.insertRow();
     newRow.innerHTML = `
         <td>
@@ -26,76 +33,106 @@ function addRow() {
     `;
 }
 
-function removeRow() {
-    const table = document.getElementById('headerTable');
-    const rowCount = table.rows.length;
-    if (rowCount > 1) { // 最初の行を除いて削除
+// テーブル行を削除する関数
+function removeTableRow() {
+    var table = document.getElementById('headerTable').getElementsByTagName('tbody')[0];
+    var rowCount = table.rows.length;
+    if (rowCount > 0) { // 少なくとも1行が存在する場合のみ削除
         table.deleteRow(-1);
     }
 }
 
-function submitForm(event) {
-    event.preventDefault();
-    const headers = {};
-    Array.from(document.querySelectorAll('#headerTable tr')).slice(1).forEach((tr, index) => {
-        headers[`headline${index + 1}`] = {
-            level: tr.querySelector('select[name="headerLevel[]"]').value,
-            text: tr.querySelector('textarea[name="headerText[]"]').value,
-            charCount: tr.querySelector('textarea[name="headerCharCount[]"]').value,
-            summary: tr.querySelector('textarea[name="headerSummary[]"]').value,
-            keywords: tr.querySelector('textarea[name="headerKeywords[]"]').value.split(',').map(kw => kw.trim()),
-            notes: tr.querySelector('textarea[name="headerNotes[]"]').value
-        };
-    });
 
-    const formData = {
-        section1: {
-            keywords: document.getElementById('inputKeyword').value.split(',').map(kw => kw.trim()),
-            targetReader: document.getElementById('inputTarget').value,
-            searchIntent: document.getElementById('inputIntent').value,
-            goal: document.getElementById('inputGoal').value,
-            title: document.getElementById('inputTitle').value,
-            description: document.getElementById('inputDescription').value
-        },
-        section2: headers
-    };
-
-    fetch('/submit', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        // Start listening to the stream from the server
-        const eventSource = new EventSource('/stream_seo');
-        eventSource.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            const outputFrame = document.getElementById('outputFrame');
-            // If there is content, append it to the output frame
-            if (data.content) {
-                const p = document.createElement('p');
-                p.textContent = data.content;
-                outputFrame.appendChild(p);
-            }
-            // If there is an error, display it and close the event source
-            if (data.error) {
-                document.getElementById('message').textContent = data.error;
-                document.getElementById('message').style.color = 'red';
-                eventSource.close();
-            }
-        };
-        document.getElementById('message').textContent = '送信に成功しました。コンテンツをストリーミングしています...';
-        document.getElementById('message').style.color = 'green';
-    })
-    .catch(error => {
-        document.getElementById('message').textContent = '送信に失敗しました: ' + error.message;
-        document.getElementById('message').style.color = 'red';
-        console.error('送信エラー:', error);
-    });
-}
+// フォーム検証関数
+function validateForm(event) {
+    event.preventDefault(); // 実際のフォーム送信を阻止
+    var isValid = true; // フォームが有効かどうかを追跡するフラグ
+    var inputs = document.querySelectorAll('#seoForm input[type="text"], #seoForm textarea');
     
+    inputs.forEach(function(input) {
+        if (input.value.trim() === '') {
+            isValid = false;
+        }
+    });
+
+    var messageElement = document.getElementById('message');
+    if (isValid) {
+        messageElement.textContent = '送信されました。';
+        messageElement.className = 'success'; // 成功メッセージのスタイルクラス
+    } else {
+        messageElement.textContent = '未入力の箇所があります。';
+        messageElement.className = 'error'; // エラーメッセージのスタイルクラス
+    }
+    return isValid;
+}
+
+
+document.getElementById('seoForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // 実際のフォーム送信を阻止
+    validateForm(event);
+
+    if (window.isValid) {
+        const keywords = document.getElementById('inputKeyword').value.split(',').map(keyword => keyword.trim());
+        const targetReader = document.getElementById('inputTarget').value.trim();
+        const searchIntent = document.getElementById('inputIntent').value.trim();
+        const goal = document.getElementById('inputGoal').value.trim();
+        const title = document.getElementById('inputTitle').value.trim();
+        const description = document.getElementById('inputDescription').value.trim();
+        
+        const headers = Array.from(document.getElementsByName('headerLevel[]'));
+        const texts = Array.from(document.getElementsByName('headerText[]'));
+        const charCounts = Array.from(document.getElementsByName('headerCharCount[]'));
+        const summaries = Array.from(document.getElementsByName('headerSummary[]'));
+        const keywordsInputs = Array.from(document.getElementsByName('headerKeywords[]'));
+        const notes = Array.from(document.getElementsByName('headerNotes[]'));
+
+        const section2 = headers.reduce((acc, header, index) => {
+            const headline = `headline${index + 1}`;
+            acc[headline] = {
+                level: header.value,
+                text: texts[index].value.trim(),
+                charCount: charCounts[index].value.trim(),
+                summary: summaries[index].value.trim(),
+                keywords: keywordsInputs[index].value.split(',').map(keyword => keyword.trim()),
+                notes: notes[index].value.trim()
+            };
+            return acc;
+        }, {});
+
+        const jsonData = {
+            section1: {
+                keywords,
+                targetReader,
+                searchIntent,
+                goal,
+                title,
+                description
+            },
+            section2
+        };
+
+        fetch('/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jsonData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text(); // または response.json() など、レスポンスに応じて
+        })
+        .then(data => {
+            console.log(data);
+            document.getElementById('message').textContent = 'データが正常に送信されました。';
+            document.getElementById('message').className = 'success';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = '送信中にエラーが発生しました。';
+            document.getElementById('message').className = 'error';
+        });
+    }
+});
