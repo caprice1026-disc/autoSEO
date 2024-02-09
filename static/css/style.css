@@ -233,7 +233,7 @@ button:hover {
 }
 /* 既存のスタイル */
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 400px) (max-height: 768px)
     /* スマートフォン表示のスタイル調整 */
     #headerTable, 
     #headerTable thead, 
@@ -242,7 +242,7 @@ button:hover {
     #headerTable td, 
     #headerTable tr { 
         display: block; 
-    }
+    
 
     #headerTable thead tr { 
         position: absolute;
@@ -252,12 +252,13 @@ button:hover {
 
     #headerTable td {
         /* セルごとにマージンとパディングを設定 */
-        margin: 0;
+        margin: 10px;
         padding: 10px;
         border-bottom: 1px solid #ddd;
         position: relative;
         padding-left: 50%;
         text-align: left;
+        
     }
 
     #headerTable td:before {
@@ -281,7 +282,7 @@ button:hover {
         width: 100%;
         margin: 10px 0; /* ボタンの上下のマージンを設定 */
     }
-}
+
 /* 既存のスタイル */
 
 /* 既存のスタイル */
