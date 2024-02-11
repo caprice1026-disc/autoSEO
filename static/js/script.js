@@ -15,13 +15,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // サーバーからの応答をリッスン
+// サーバーからの応答をリッスン
     socket.on('response', function(data) {
         var outputFrame = document.getElementById('outputFrame');
-        // 受け取ったデータ（チャンク）を含む新しいテキストノードを作成
-        var newText = document.createTextNode(data.data);
-        // テキストノードをoutput-frameに追加
-        outputFrame.appendChild(newText);
-    });
+    
+        // Blobをテキストに変換するためのFileReaderを作成
+        var reader = new FileReader();
+        reader.onload = function() {
+            // FileReaderが完了したら、その結果をoutputFrameに追加
+            var newText = document.createTextNode(reader.result);
+            outputFrame.appendChild(newText);
+    };
+    // 受け取ったバイナリデータ（Blob）をテキストとして読み込む
+    reader.readAsText(new Blob([data]), 'utf-8');
+});
 
     // サーバーからのエラー応答をリッスン
     socket.on('error', function(data) {

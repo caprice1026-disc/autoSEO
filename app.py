@@ -56,10 +56,17 @@ def handle_send_data(json_data):
             )
 
             # 応答をクライアントに送信
-            for message in response:
-                if 'choices' in message and message['choices']:
-                    chunk = message['choices'][0].message.content
-                    emit('response', {'data': chunk}, broadcast=True)
+            for chunk in response.iter_content():
+              if chunk:
+                text_data = chunk.choices[0].delta.content
+                binary_data = text_data.encode('utf-8')
+                emit('response', binary_data, broadcast=True)
+                previous_content += response[0].choices[0].delta
+              if chunk == '[DONE]':
+                print(previous_content)
+                break
+
+
 
     except Exception as e:
         emit('error', {'error': str(e)})
