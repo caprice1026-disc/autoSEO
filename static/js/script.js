@@ -1,3 +1,6 @@
+// Socket.IOのインスタンスを作成
+const socket = io();
+
 // DOMが読み込まれた後にイベントリスナーを設定
 document.addEventListener('DOMContentLoaded', function() {
     // 行の追加ボタンにイベントリスナーを追加
@@ -9,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // フォーム送信時にsubmitForm関数を呼び出すイベントリスナーを追加
     document.getElementById('seoForm').addEventListener('submit', submitForm);
     // WebSocketの接続を初期化
-    var socket = io(); // Flask-SocketIOを使用している場合
+
 
     // サーバーからの応答をリッスン
     socket.on('response', function(data) {
@@ -83,7 +86,6 @@ function validateForm(event) {
     }
     return isValid;
 }
-
 
 function submitForm(event) {
     event.preventDefault(); // 実際のフォーム送信を阻止
