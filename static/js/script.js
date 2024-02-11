@@ -69,9 +69,7 @@ function validateForm(event) {
 
 document.getElementById('seoForm').addEventListener('submit', function(event) {
     event.preventDefault(); // 実際のフォーム送信を阻止
-    validateForm(event);
-
-    if (window.isValid) {
+    if (validateForm(event)) { // フォームの検証が成功した場合にのみ送信を進める
         const keywords = document.getElementById('inputKeyword').value.split(',').map(keyword => keyword.trim());
         const targetReader = document.getElementById('inputTarget').value.trim();
         const searchIntent = document.getElementById('inputIntent').value.trim();
@@ -79,6 +77,7 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
         const title = document.getElementById('inputTitle').value.trim();
         const description = document.getElementById('inputDescription').value.trim();
         
+        // ヘッダー情報の収集
         const headers = Array.from(document.getElementsByName('headerLevel[]'));
         const texts = Array.from(document.getElementsByName('headerText[]'));
         const charCounts = Array.from(document.getElementsByName('headerCharCount[]'));
@@ -86,6 +85,7 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
         const keywordsInputs = Array.from(document.getElementsByName('headerKeywords[]'));
         const notes = Array.from(document.getElementsByName('headerNotes[]'));
 
+        // セクションデータの構築
         const section2 = headers.reduce((acc, header, index) => {
             const headline = `headline${index + 1}`;
             acc[headline] = {
@@ -99,6 +99,7 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
             return acc;
         }, {});
 
+        // JSONデータの構築
         const jsonData = {
             section1: {
                 keywords,
@@ -111,28 +112,12 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
             section2
         };
 
-        fetch('/process', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(jsonData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text(); // または response.json() など、レスポンスに応じて
-        })
-        .then(data => {
-            console.log(data);
-            document.getElementById('message').textContent = 'データが正常に送信されました。';
-            document.getElementById('message').className = 'success';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('message').textContent = '送信中にエラーが発生しました。';
-            document.getElementById('message').className = 'error';
-        });
+        // WebSocketを使用してサーバーにデータを送信
+        socket.emit('send_data', jsonData);
+
+        // 送信成功メッセージの表示
+        document.getElementById('message').textContent = 'データが正常に送信されました。';
+        document.getElementById('message').className = 'success';
     }
 });
+
