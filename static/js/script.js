@@ -6,8 +6,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // 行の削除ボタンにイベントリスナーを追加
     document.getElementById('removeRowButton').addEventListener('click', removeTableRow);
 
-    // フォーム送信時の検証イベントリスナーを追加
-    document.getElementById('seoForm').addEventListener('submit', validateForm);
+    // フォーム送信時にsubmitForm関数を呼び出すイベントリスナーを追加
+    document.getElementById('seoForm').addEventListener('submit', submitForm);
+    // WebSocketの接続を初期化
+    var socket = io(); // Flask-SocketIOを使用している場合
+
+    // サーバーからの応答をリッスン
+    socket.on('response', function(data) {
+        var outputFrame = document.getElementById('outputFrame');
+        // 受け取ったデータ（チャンク）を含む新しいテキストノードを作成
+        var newText = document.createTextNode(data.data);
+        // テキストノードをoutput-frameに追加
+        outputFrame.appendChild(newText);
+    });
+
+    // サーバーからのエラー応答をリッスン
+    socket.on('error', function(data) {
+        var outputFrame = document.getElementById('outputFrame');
+        outputFrame.textContent = 'エラーが発生しました: ' + data.error;
+        outputFrame.className = 'error';
+    });
 });
 
 // テーブル行を追加する関数
@@ -67,7 +85,7 @@ function validateForm(event) {
 }
 
 
-document.getElementById('seoForm').addEventListener('submit', function(event) {
+function submitForm(event) {
     event.preventDefault(); // 実際のフォーム送信を阻止
     if (validateForm(event)) { // フォームの検証が成功した場合にのみ送信を進める
         const keywords = document.getElementById('inputKeyword').value.split(',').map(keyword => keyword.trim());
@@ -77,7 +95,7 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
         const title = document.getElementById('inputTitle').value.trim();
         const description = document.getElementById('inputDescription').value.trim();
         
-        // ヘッダー情報の収集
+        // ヘッダー情報の収集...
         const headers = Array.from(document.getElementsByName('headerLevel[]'));
         const texts = Array.from(document.getElementsByName('headerText[]'));
         const charCounts = Array.from(document.getElementsByName('headerCharCount[]'));
@@ -85,10 +103,10 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
         const keywordsInputs = Array.from(document.getElementsByName('headerKeywords[]'));
         const notes = Array.from(document.getElementsByName('headerNotes[]'));
 
-        // セクションデータの構築
+        // セクションデータの構築...
         const section2 = headers.reduce((acc, header, index) => {
-            const headline = `headline${index + 1}`;
-            acc[headline] = {
+            const headlineKey = `headline${index + 1}`; // headline1, headline2, ...
+            acc[headlineKey] = {
                 level: header.value,
                 text: texts[index].value.trim(),
                 charCount: charCounts[index].value.trim(),
@@ -98,6 +116,7 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
             };
             return acc;
         }, {});
+        
 
         // JSONデータの構築
         const jsonData = {
@@ -119,5 +138,4 @@ document.getElementById('seoForm').addEventListener('submit', function(event) {
         document.getElementById('message').textContent = 'データが正常に送信されました。';
         document.getElementById('message').className = 'success';
     }
-});
-
+}
