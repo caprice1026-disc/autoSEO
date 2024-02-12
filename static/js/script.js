@@ -108,7 +108,24 @@ function submitForm(event) {
 function startSSE(endpoint) {
     const eventSource = new EventSource(endpoint);
     eventSource.onmessage = function(event) {
-        console.log('Received SSE:', event.data);
-        // SSEのデータを受け取った際の処理をここに記述
+        const data = JSON.parse(event.data);
+        const outputFrame = document.getElementById('outputFrame');
+
+        // contentが存在する場合、outputFrameに追加する
+        if (data.content) {
+            const p = document.createElement('p');
+            p.textContent = data.content;
+            outputFrame.appendChild(p);
+        }
+    };
+
+    eventSource.onerror = function(event) {
+        console.error('SSE error:', event);
+        eventSource.close(); // エラー発生時に接続を閉じる
+    };
+
+    // 接続が閉じられた場合の処理
+    eventSource.onclose = function(event) {
+        console.log('SSE closed:', event);
     };
 }
