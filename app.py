@@ -10,14 +10,6 @@ socketio = SocketIO(app)
 def index():
     return render_template('index.html')
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
-
 @socketio.on('send_data')
 def handle_send_data(json_data):
     try:

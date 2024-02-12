@@ -1,44 +1,9 @@
-// Socket.IOのインスタンスを作成
-const socket = io();
-
-// DOMが読み込まれた後にイベントリスナーを設定
 document.addEventListener('DOMContentLoaded', function() {
-    // 行の追加ボタンにイベントリスナーを追加
     document.getElementById('addRowButton').addEventListener('click', addRow);
-
-    // 行の削除ボタンにイベントリスナーを追加
     document.getElementById('removeRowButton').addEventListener('click', removeTableRow);
-
-    // フォーム送信時にsubmitForm関数を呼び出すイベントリスナーを追加
     document.getElementById('seoForm').addEventListener('submit', submitForm);
-    // WebSocketの接続を初期化
-
-
-    // サーバーからの応答をリッスン
-// サーバーからの応答をリッスン
-    socket.on('response', function(data) {
-        var outputFrame = document.getElementById('outputFrame');
-    
-        // Blobをテキストに変換するためのFileReaderを作成
-        var reader = new FileReader();
-        reader.onload = function() {
-            // FileReaderが完了したら、その結果をoutputFrameに追加
-            var newText = document.createTextNode(reader.result);
-            outputFrame.appendChild(newText);
-    };
-    // 受け取ったバイナリデータ（Blob）をテキストとして読み込む
-    reader.readAsText(new Blob([data]), 'utf-8');
 });
 
-    // サーバーからのエラー応答をリッスン
-    socket.on('error', function(data) {
-        var outputFrame = document.getElementById('outputFrame');
-        outputFrame.textContent = 'エラーが発生しました: ' + data.error;
-        outputFrame.className = 'error';
-    });
-});
-
-// テーブル行を追加する関数
 function addRow() {
     const table = document.getElementById('headerTable').getElementsByTagName('tbody')[0];
     const newRow = table.insertRow();
@@ -61,22 +26,18 @@ function addRow() {
     `;
 }
 
-// テーブル行を削除する関数
 function removeTableRow() {
     var table = document.getElementById('headerTable').getElementsByTagName('tbody')[0];
     var rowCount = table.rows.length;
-    if (rowCount > 0) { // 少なくとも1行が存在する場合のみ削除
+    if (rowCount > 1) { // 最初の入力行は削除しない
         table.deleteRow(-1);
     }
 }
 
-
-// フォーム検証関数
-function validateForm(event) {
-    event.preventDefault(); // 実際のフォーム送信を阻止
-    var isValid = true; // フォームが有効かどうかを追跡するフラグ
+function validateForm() {
+    var isValid = true;
     var inputs = document.querySelectorAll('#seoForm input[type="text"], #seoForm textarea');
-    
+
     inputs.forEach(function(input) {
         if (input.value.trim() === '') {
             isValid = false;
@@ -84,10 +45,7 @@ function validateForm(event) {
     });
 
     var messageElement = document.getElementById('message');
-    if (isValid) {
-        messageElement.textContent = '送信されました。';
-        messageElement.className = 'success'; // 成功メッセージのスタイルクラス
-    } else {
+    if (!isValid) {
         messageElement.textContent = '未入力の箇所があります。';
         messageElement.className = 'error'; // エラーメッセージのスタイルクラス
     }
@@ -95,56 +53,62 @@ function validateForm(event) {
 }
 
 function submitForm(event) {
-    event.preventDefault(); // 実際のフォーム送信を阻止
-    if (validateForm(event)) { // フォームの検証が成功した場合にのみ送信を進める
-        const keywords = document.getElementById('inputKeyword').value.split(',').map(keyword => keyword.trim());
-        const targetReader = document.getElementById('inputTarget').value.trim();
-        const searchIntent = document.getElementById('inputIntent').value.trim();
-        const goal = document.getElementById('inputGoal').value.trim();
-        const title = document.getElementById('inputTitle').value.trim();
-        const description = document.getElementById('inputDescription').value.trim();
-        
-        // ヘッダー情報の収集...
-        const headers = Array.from(document.getElementsByName('headerLevel[]'));
-        const texts = Array.from(document.getElementsByName('headerText[]'));
-        const charCounts = Array.from(document.getElementsByName('headerCharCount[]'));
-        const summaries = Array.from(document.getElementsByName('headerSummary[]'));
-        const keywordsInputs = Array.from(document.getElementsByName('headerKeywords[]'));
-        const notes = Array.from(document.getElementsByName('headerNotes[]'));
-
-        // セクションデータの構築...
-        const section2 = headers.reduce((acc, header, index) => {
-            const headlineKey = `headline${index + 1}`; // headline1, headline2, ...
-            acc[headlineKey] = {
-                level: header.value,
-                text: texts[index].value.trim(),
-                charCount: charCounts[index].value.trim(),
-                summary: summaries[index].value.trim(),
-                keywords: keywordsInputs[index].value.split(',').map(keyword => keyword.trim()),
-                notes: notes[index].value.trim()
-            };
-            return acc;
-        }, {});
-        
-
-        // JSONデータの構築
+    event.preventDefault();
+    if (validateForm()) {
+        const formData = new FormData(event.target);
         const jsonData = {
             section1: {
-                keywords,
-                targetReader,
-                searchIntent,
-                goal,
-                title,
-                description
+                keywords: formData.get('inputKeyword').split(',').map(kw => kw.trim()),
+                targetReader: formData.get('inputTarget').trim(),
+                searchIntent: formData.get('inputIntent').trim(),
+                goal: formData.get('inputGoal').trim(),
+                title: formData.get('inputTitle').trim(),
+                description: formData.get('inputDescription').trim(),
             },
-            section2
+            section2: {}
         };
 
-        // WebSocketを使用してサーバーにデータを送信
-        socket.emit('send_data', jsonData);
+        document.querySelectorAll("[name='headerLevel[]']").forEach((header, index) => {
+            const level = header.value;
+            const text = document.querySelectorAll("[name='headerText[]']")[index].value.trim();
+            const charCount = document.querySelectorAll("[name='headerCharCount[]']")[index].value.trim();
+            const summary = document.querySelectorAll("[name='headerSummary[]']")[index].value.trim();
+            const keywords = document.querySelectorAll("[name='headerKeywords[]']")[index].value.split(',').map(keyword => keyword.trim());
+            const notes = document.querySelectorAll("[name='headerNotes[]']")[index].value.trim();
 
-        // 送信成功メッセージの表示
-        document.getElementById('message').textContent = 'データが正常に送信されました。';
-        document.getElementById('message').className = 'success';
+            jsonData.section2[`headline${index + 1}`] = { level, text, charCount, summary, keywords, notes };
+        });
+
+        fetch('バックエンドのPOSTエンドポイントURL', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jsonData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('POST request failed');
+            }
+            return response.json();
+        })
+        .then(data => {
+            startSSE('SSEのエンドポイントURL');
+            document.getElementById('message').textContent = 'データが正常に送信されました。';
+            document.getElementById('message').className = 'success';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = '送信中にエラーが発生しました。';
+            document.getElementById('message').className = 'error';
+        });
     }
+}
+
+function startSSE(endpoint) {
+    const eventSource = new EventSource(endpoint);
+    eventSource.onmessage = function(event) {
+        console.log('Received SSE:', event.data);
+        // SSEのデータを受け取った際の処理をここに記述
+    };
 }
