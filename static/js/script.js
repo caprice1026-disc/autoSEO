@@ -107,15 +107,23 @@ function submitForm(event) {
 
 function startSSE(endpoint) {
     const eventSource = new EventSource(endpoint);
+    const outputFrame = document.getElementById('outputFrame');
+
     eventSource.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        const outputFrame = document.getElementById('outputFrame');
 
-        // contentが存在する場合、outputFrameに追加する
+        // 見出しを表示
+        if (data.midashi) {
+            const heading = document.createElement('h2');
+            heading.textContent = data.midashi;
+            outputFrame.appendChild(heading); // 見出しを即座に追加
+        }
+
+        // コンテンツを表示
         if (data.content) {
-            const p = document.createElement('p');
-            p.textContent = data.content;
-            outputFrame.appendChild(p);
+            // コンテンツのテキストをテキストノードとして追加
+            const textNode = document.createTextNode(data.content + " "); // テキストの後にスペースを追加
+            outputFrame.appendChild(textNode); // テキストノードを即座に追加
         }
     };
 
@@ -124,8 +132,10 @@ function startSSE(endpoint) {
         eventSource.close(); // エラー発生時に接続を閉じる
     };
 
-    // 接続が閉じられた場合の処理
     eventSource.onclose = function(event) {
         console.log('SSE closed:', event);
     };
 }
+
+
+

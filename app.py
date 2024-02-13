@@ -33,14 +33,13 @@ def handle_submit():
             summary = headline_value['summary']
             keywords = headline_value['keywords']
             notes = headline_value['notes']
-            
             user_prompt = (
                 f"{level}の部分の記事を作成します。記事の見出しは'{text}'で、文字数は'{charCount}'です。"
                 f"内容は'{summary}'です。記事内に、{', '.join(keywords)}を必ず含めてください。"
                 f"記事を書く際は、'{notes}'を意識してください。これ以前の内容はこのようになっています。'{previous_content}'"
                 f"これに整合性を合わせて書いてください。"
             )
-            responses.append({"text": user_prompt})
+            responses.append({'midashi': text, 'prompt': user_prompt})
         session["responses"] = responses  # セッションにresponsesリストを保存
         session["system_prompt"] = system_prompt
         return jsonify({"message": "データを受け取り、処理が開始されました。"})
@@ -62,10 +61,11 @@ def generate(responses, system_prompt):
     stream = True  # ストリーミング応答を有効化
 
     for response in responses:
-        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": response["text"]}]
+        yield f"data: {json.dumps({'midashi': response['midashi'], 'content': '見出し: ' + response['midashi']})}\n\n"
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": response['prompt']}]
         completion = openai_api_call(model, temperature, messages, max_tokens, response_format, stream)
         for chunk in completion:  # ストリーミング応答をイテレート
-            yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}"
+            yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}\n\n"
 
 
             
