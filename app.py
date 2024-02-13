@@ -3,9 +3,10 @@ from flask_session import Session  # Flask-Sessionをインポート
 from backend.openaiapi import openai_api_call
 from backend.main import main
 import json
+import os
 
 app = Flask(__name__)
-app.secret
+app.config["SECRET_KEY"] = os.urandom(24)  # 24バイトのランダムなキーを生成
 app.config["SESSION_PERMANENT"] = False  # セッションをブラウザを閉じたら破棄
 app.config["SESSION_TYPE"] = "filesystem"  # セッションをファイルシステムに保存
 Session(app)  # セッションをアプリケーションに登録
