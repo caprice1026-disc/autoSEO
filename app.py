@@ -38,6 +38,7 @@ def handle_submit():
                 f"内容は'{summary}'です。記事内に、{', '.join(keywords)}を必ず含めてください。"
                 f"記事を書く際は、'{notes}'を意識してください。これ以前の内容はこのようになっています。'{previous_content}'"
                 f"これに整合性を合わせて書いてください。"
+                f"'''HTML記法やMD記法を使わず、プレーンテキストで書いてください'''"
             )
             responses.append({'midashi': text, 'prompt': user_prompt})
         session["responses"] = responses  # セッションにresponsesリストを保存
