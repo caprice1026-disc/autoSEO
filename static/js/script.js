@@ -65,7 +65,7 @@ function validateForm(event) {
 
 function submitForm(event) {
     event.preventDefault();
-    if (validateForm()) {
+    if (validateForm(event)){
         const formData = new FormData(event.target);
         const jsonData = {
             section1: {
