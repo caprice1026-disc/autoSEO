@@ -4,7 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>SEOライティングツール</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
 </head>
 <body>
 
@@ -56,7 +58,7 @@
             <tr>
                 <td>
                    
-                 <select name="headerLevel">
+                    <select name="headerLevel[]">
                     <option value="h1">H1</option>
                     <option value="h2">H2</option>
                     <option value="h3">H3</option>
@@ -65,12 +67,11 @@
                     <option value="h6">H6</option>
                 </select>
            </td>
-            <td data-label="見出しテキスト"><textarea name="headerText" placeholder="見出しテキスト"></textarea></td>
-            <td data-label="文字数"><textarea name="headerCharCount" placeholder="例: 120" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
-<td data-label="記事の簡潔な要約"><textarea name="headerSummary" placeholder="記事の簡潔な要約"></textarea></td>
-<td data-label="SEOキーワード"><textarea name="headerKeywords" placeholder="SEOキーワード"></textarea></td>
-<td data-label=”その他のメモ”><textarea name="headerNotes" placeholder="その他のメモ"></textarea></td>
-
+           <td><textarea name="headerText[]" placeholder="見出しテキスト"></textarea></td>
+           <td><textarea name="headerCharCount[]" placeholder="例: 120" oninput="this.value=this.value.replace(/[^0-9]/g,'');"></textarea></td>
+           <td><textarea name="headerSummary[]" placeholder="記事の簡潔な要約"></textarea></td>
+           <td><textarea name="headerKeywords[]" placeholder="SEOキーワード"></textarea></td>
+           <td><textarea name="headerNotes[]" placeholder="その他のメモ"></textarea></td>
         </tr>
     </table>
     
@@ -84,6 +85,6 @@
 <div class="output-frame" id="outputFrame"></div>
 <div id="message"></div>
 
-<script src="script.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

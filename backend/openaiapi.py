@@ -2,15 +2,25 @@ from openai import OpenAI
 import os
 
 # Openai APIの設定
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI()
 
 # OpenAI API呼び出し関数
-def openai_api_call(model, temperature, messages, max_tokens, response_format):
+def openai_api_call(model, temperature, messages, max_tokens, response_format, stream=False):
     try:
         # OpenAI API呼び出しを行う
-        response = client.chat.completions.create(model=model, temperature=temperature, messages=messages, max_tokens=max_tokens, response_format=response_format)
-        return response.choices[0].message.content  # 辞書型アクセスから属性アクセスへ変更
+        response = client.chat.completions.create(
+            model=model,
+            temperature=temperature,
+            messages=messages,
+            max_tokens=max_tokens,
+            response_format=response_format,
+            stream=stream
+        )
+        if stream:
+            return response
+        else:
+            return response.choices[0].message.content  # 辞書型アクセスから属性アクセスへ変更
     except Exception as e:
         print(f"OpenAI API呼び出し中にエラーが発生しました: {e}")
         
@@ -27,24 +37,8 @@ def seo_rival(content):
         4000,  # リード文の最大トークン数を適宜設定
         {"type": "text"}
         )
-        return response
-    except Exception as e:
-        print(f"SEO要点抽出中にエラーが発生しました: {e}")
-        raise e
-    
-def generate_seo_content(system_prompt, user_prompt):
-    try:
-        response = openai_api_call(
-            "gpt-4-turbo-preview",
-            0,
-            [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            4000,  # リード文の最大トークン数を適宜設定
-            {"type": "text"}
-        )
-        return response
+        seo_essence = ' '.join(response.split())
+        return seo_essence
     except Exception as e:
         print(f"SEO要点抽出中にエラーが発生しました: {e}")
         raise e

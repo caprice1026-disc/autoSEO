@@ -2,12 +2,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 行の追加ボタンにイベントリスナーを追加
     document.getElementById('addRowButton').addEventListener('click', addRow);
-
-    // 行の削除ボタンにイベントリスナーを追加
     document.getElementById('removeRowButton').addEventListener('click', removeTableRow);
-
-    // フォーム送信時の検証イベントリスナーを追加
-    document.getElementById('seoForm').addEventListener('submit', validateForm);
+    document.getElementById('seoForm').addEventListener('submit', submitForm);
 });
 
 // テーブル行を追加する関数
@@ -37,10 +33,12 @@ function addRow() {
 function removeTableRow() {
     var table = document.getElementById('headerTable').getElementsByTagName('tbody')[0];
     var rowCount = table.rows.length;
-    if (rowCount > 0) { // 少なくとも1行が存在する場合のみ削除
+    if (rowCount > 1) { // 最初の入力行は削除しない
+
         table.deleteRow(-1);
     }
 }
+
 
 // フォーム検証関数
 function validateForm(event) {
@@ -56,13 +54,100 @@ function validateForm(event) {
         }
     });
 
-    // 検証結果に基づいてフィードバックをユーザーに表示
+    // エラーメッセージの表示
     var messageElement = document.getElementById('message');
-    if (isValid) {
-        messageElement.textContent = '送信されました。';
-        messageElement.className = 'success'; // 成功メッセージのスタイルクラス
-    } else {
+    if (!isValid) {
         messageElement.textContent = '未入力の箇所があります。';
         messageElement.className = 'error'; // エラーメッセージのスタイルクラス
     }
+    return isValid;
 }
+
+function submitForm(event) {
+    event.preventDefault();
+    if (validateForm()) {
+        const formData = new FormData(event.target);
+        const jsonData = {
+            section1: {
+                keywords: formData.get('inputKeyword').split(',').map(kw => kw.trim()),
+                targetReader: formData.get('inputTarget').trim(),
+                searchIntent: formData.get('inputIntent').trim(),
+                goal: formData.get('inputGoal').trim(),
+                title: formData.get('inputTitle').trim(),
+                description: formData.get('inputDescription').trim(),
+            },
+            section2: {}
+        };
+
+        document.querySelectorAll("[name='headerLevel[]']").forEach((header, index) => {
+            const level = header.value;
+            const text = document.querySelectorAll("[name='headerText[]']")[index].value.trim();
+            const charCount = document.querySelectorAll("[name='headerCharCount[]']")[index].value.trim();
+            const summary = document.querySelectorAll("[name='headerSummary[]']")[index].value.trim();
+            const keywords = document.querySelectorAll("[name='headerKeywords[]']")[index].value.split(',').map(keyword => keyword.trim());
+            const notes = document.querySelectorAll("[name='headerNotes[]']")[index].value.trim();
+
+            jsonData.section2[`headline${index + 1}`] = { level, text, charCount, summary, keywords, notes };
+        });
+
+        fetch('/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jsonData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('POST request failed');
+            }
+            return response.json();
+        })
+        .then(data => {
+            startSSE('/events');
+            document.getElementById('message').textContent = 'データが正常に送信されました。';
+            document.getElementById('message').className = 'success';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = '送信中にエラーが発生しました。';
+            document.getElementById('message').className = 'error';
+        });
+    }
+}
+
+function startSSE(endpoint) {
+    const eventSource = new EventSource(endpoint);
+    const outputFrame = document.getElementById('outputFrame');
+
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        // 見出しを表示
+        if (data.midashi) {
+            const heading = document.createElement('h2');
+            heading.textContent = data.midashi;
+            outputFrame.appendChild(heading); // 見出しを即座に追加
+        }
+
+        // コンテンツを表示
+        if (data.content) {
+            // コンテンツのテキストをテキストノードとして追加
+            const textNode = document.createTextNode(data.content + " "); // テキストの後にスペースを追加
+            outputFrame.appendChild(textNode); // テキストノードを即座に追加
+        }
+    };
+
+    eventSource.onerror = function(event) {
+        console.error('SSE error:', event);
+        eventSource.close(); // エラー発生時に接続を閉じる
+    };
+
+    eventSource.onclose = function(event) {
+        console.log('SSE closed:', event);
+    };
+}
+
+
+
+

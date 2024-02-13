@@ -1,35 +1,33 @@
 import json
-import flask
 import os
 import requests
 from bs4 import BeautifulSoup
-from backend.openaiapi import seo_rival, openai_api_call, generate_seo_content
-
+from backend.openaiapi import seo_rival
+from googleapiclient.discovery import build
 
 api_key = os.environ.get('GOOGLE_API_KEY')
 cse_id = os.environ.get('GOOGLE_CSE_ID')
 
-def process_json(json_data):
-    try:
-        section1 = json_data['section1']
-        section2 = json_data['section2']
-        main(section1, section2)
-    except Exception as e:
-        print(e)
-        raise e  # 例外を再度発生させる
+def update_system_prompt(system_prompt, previous_content):
+    updated_prompt = f"{system_prompt}\n\n{previous_content}"
+    return updated_prompt
     
-def google_search(query, api_key, cse_id, num_results=3):
-    url = "https://www.googleapis.com/customsearch/v1"
-    params = {
-        'q': query,
-        'cx': cse_id,
-        'key': api_key,
-        'num': num_results
-    }
-    response = requests.get(url, params=params)
-    result = response.json()
-    # 結果をリスト形式で返す。各要素は検索結果のURL
-    return [item['link'] for item in result.get('items', [])]
+def google_search(query, api_key=api_key, cse_id=cse_id, num_results=3):
+    try:
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            'q': query,
+            'cx': cse_id,
+            'key': api_key,
+            'num': num_results
+        }
+        response = requests.get(url, params=params)
+        result = response.json()
+        # 結果をリスト形式で返す。各要素は検索結果のURL
+        return [item['link'] for item in result.get('items', [])]
+    except requests.RequestException as e:
+        print(f"検索中にエラーが発生しました: {e}")
+        return []
 
 # URLからコンテンツを取得する関数
 def fetch_content_from_url(url):
@@ -41,7 +39,7 @@ def fetch_content_from_url(url):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         }
 
-        response = requests.get(url, headers=headers, timeout=30)
+        response = requests.get(url, headers=headers, timeout=10)
         content = response.text
 
         print(f"URLからコンテンツの取得が成功: {url}")
@@ -71,100 +69,49 @@ def parse_content(content):
         print(f"コンテンツのパース中にエラーが発生しました: {e}")
         return ""
     
-def generate_seo_content(system_prompt, user_prompt):
-    try:
-        response = openai_api_call(
-            "gpt-4-1106-preview",
-            0,
-            [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            4000,  # リード文の最大トークン数を適宜設定
-            {"type": "text"}
-        )
-        return response
-    except Exception as e:
-        print(f"コンテンツ作成中にエラーが発生しました: {e}")
-        raise e
-
-    
 def main(json_data):
-    # section1の各内容を取得
-    section1 = json_data['section1']
-    section2 = json_data['section2']
-    keywords = section1['keyword']
-    results = {}
+    try:
+        # section1の各内容を取得
+        section1 = json_data['section1']
+        keywords = section1['keywords']
+        results = {}
 
-    for keyword in keywords:
-        urls = google_search(keyword, api_key, cse_id)
-        contents = []
+        for keyword in keywords:
+            urls = google_search(keyword)
+            for url in urls:
+                if url not in results:
+                    content = fetch_content_from_url(url)
+                    if content:
+                        parsed_content = parse_content(content)  # コンテンツをパース
+                        results[url] = [parsed_content]  # 新しいURLの場合、リストを初期化して追加
+        # 既存のURLの場合、コンテンツを再度フェッチしてパースする必要はないため、この部分は削除します。
 
-        for url in urls:
-            content = fetch_content_from_url(url)
-            if content:
-                parsed_content = parse_content(content)
-                contents.append(parsed_content)
 
-            results[url] = contents
+        # 結果を文字列として組み立て
+        results_content = ""
+        for url, content_list in results.items():
+            results_content += f"URL: {url}\n"
+            for content in content_list:
+                results_content += f"{content}\n\n"
+            results_content += "\n\n"
 
-    # 結果を文字列として組み立て
-    results_content = ""
-    for url, content_list in results.items():
-        results_content += f"URL: {url}\n"
-        for content in content_list:
-            results_content += f"{content}\n\n"
-        results_content += "\n\n"
-
-    seo_essense = seo_rival(results_content)
-
-    # section1の各内容を取得
-    expected_reader = section1['expected_reader']
-    search_intent = section1['search_intent']
-    goal = section1['goal']
-    title = section1['title']
-    system_prompt = (
-    "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、すべてのSEOに関する知識を持っています。"
-    f'"""{seo_essense}"""を参考に、"""{expected_reader}"""向けの"""{search_intent}"""の検索意図に適したコンテンツを作成してください。' 
-    f'コンテンツの目的は"""{goal}"""で、タイトルは"""{title}"""です。'
-    )
-
-    # 各見出しのコンテンツを生成して保存する辞書
-    generated_contents = {}
-    # 前の見出しのコンテンツを保存する変数
-    previous_content = ""
-    # section2の各見出しに対して処理を行う
-    for headline_key, headline_value in section2.items():
-        # section2の各内容を取得
-        entry = headline_value['entry']
-        outline = headline_value['outline']
-        number_of_words = headline_value['number_of_words']
-        must_KW = headline_value.get('must_KW', [])
-        memo = headline_value.get('memo', '')
-
-        # ユーザープロンプトの生成
-        user_prompt = (
-            f'{entry}の部分の記事を作成します。記事の概要は"""{outline}"""で、文字数は"""{number_of_words}"""です。'
-            f'記事内に、{"、".join(must_KW)}を必ず含めてください。記事を書く際は、"""{memo}"""を意識してください。'
-            "下記にこれ以前のセクションの内容を添付するので、これと整合性を合わせて文章を生成してください。"
+        # system_promptの生成
+        seo_essense = seo_rival(results_content)
+        expected_reader = section1['targetReader']
+        search_intent = section1['searchIntent']
+        goal = section1['goal']
+        title = section1['title']
+        system_prompt = (
+        "あなたは優秀なSEOライター兼、コンテンツマーケターです。さらに、あなたはSEOの専門家であり、"
+        f"すべてのSEOに関する知識を持っています。'{seo_essense}'を参考に、'{expected_reader}'向けの"
+        f"'{search_intent}'の検索意図に適したコンテンツを作成してください。コンテンツの目的は'{goal}'で、"
+        f"タイトルは'{title}'です。"
         )
-
-        # 前の見出しのコンテンツを追加
-        if previous_content:
-            user_prompt += f"\n\n{previous_content}"
-
-        # SEOコンテンツを生成
-        generated_content = generate_seo_content(system_prompt, user_prompt)
-
-        # 生成されたコンテンツを保存
-        generated_contents[headline_key] = generated_content
-
-        # 次の見出しの生成に現在のコンテンツを利用
-        previous_content = generated_content
-
-
-
-
+        return system_prompt
+        # ここまで問題なく動くのは確認済み
+    except Exception as e:
+        print(e)
+        return "エラーが発生しました。"
 
 
             
@@ -173,31 +120,35 @@ def main(json_data):
     
 # JSONデータの例。headline2のように、省略されている項目もある。headlineは各項目の見出しを表す。
 '''
+現在のフロントエンドからの出力はこれ
+
 {
   "section1": {
-    "keyword": ["サンプルキーワード1", "サンプルキーワード2"],
-    "expected_reader": "サンプル読者層",
-    "search_intent": "情報提供",
-    "goal": "読者の理解向上",
-    "title": "サンプルタイトル"
+    "keywords": ["キーワード1", "キーワード2"],
+    "targetReader": "ターゲットリーダーの値",
+    "searchIntent": "検索意図の値",
+    "goal": "目標の値",
+    "title": "タイトルの値",
+    "description": "説明の値"
   },
   "section2": {
     "headline1": {
-      "entry": "h1",
-      "headline_text": "見出し1のテキスト",
-      "outline": "見出し1の記事はSEO最適化の重要性について説明します",
-      "number_of_words": 500,
-      "must_KW": ["SEO", "検索エンジン最適化"],
-      "memo": "読者がSEOの基本を理解できるようにする"
+      "level": "h1",
+      "text": "ヘッダーテキスト1",
+      "charCount": "文字数1",
+      "summary": "要約1",
+      "keywords": ["キーワードA", "キーワードB"],
+      "notes": "ノート1"
     },
     "headline2": {
-      "entry": "h2",
-      "headline_text": "見出し2のテキスト",
-      "outline": "見出し2の記事では、キーワード選定の戦略に焦点を当てます",
-      "number_of_words": 450
-      // "must_KW" と "memo" はこのheadlineでは省略されている
+      "level": "h2",
+      "text": "ヘッダーテキスト2",
+      "charCount": "文字数2",
+      "summary": "要約2",
+      "keywords": ["キーワードC", "キーワードD"],
+      "notes": "ノート2"
     }
-    // 他のheadlineも同様の構造(3,4と続く)
   }
 }
+
 '''

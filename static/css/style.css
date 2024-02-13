@@ -286,3 +286,237 @@ button:hover {
         margin: 10px 0; /* ボタンの上下のマージンを設定 */
     }
 }
+
+/* メッセージ表示用のスタイル */
+#message {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px;
+    margin-top: 20px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* 成功メッセージ用のスタイル */
+.success {
+    color: green;
+    border-color: green;
+}
+
+/* エラーメッセージ用のスタイル */
+.error {
+    color: red;
+    border-color: red;
+}
+* フォームセクション全体をラップするスタイル */
+.form-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px; /* 最大幅を設定して中央揃えにする */
+    margin: 0 auto; /* 上下のマージンは0、左右は自動で中央揃え */
+}
+
+/* ラベルと入力フィールドを含むコンテナ */
+.field-container {
+    display: flex;
+    flex-direction: row; /* 横並びにする */
+    align-items: center; /* アイテムを中央揃え */
+    margin-bottom: 20px; /* 下のマージンを設定 */
+}
+
+/* ラベルのスタイル */
+.field-container label {
+    width: 20%; /* ラベルの幅を設定 */
+    text-align: right; /* テキストを右揃え */
+    margin-right: 10px; /* 入力フィールドとの間隔 */
+    font-weight: bold; /* フォントを太字に */
+}
+
+/* 入力フィールドのスタイル（既存のスタイルを上書きまたは追加） */
+.field-container input[type="text"],
+.field-container textarea,
+.field-container select {
+    width: 100%; /* 入力フィールドの幅をコンテナに合わせて調整 */
+    flex-grow: 1; /* 可能な限りのスペースを使用 */
+}
+
+
+
+
+input[type="text"],
+textarea {
+    width: 80%; /* 入力欄の幅を広げます */
+    padding: 10px; /* 入力時の余白を増やします */
+    font-size: 16px; /* 文字サイズを大きくして読みやすくします */
+    margin-bottom: 10px; /* 入力フィールド間の余白を設定します */
+    border: 1px solid #ccc; /* 入力フィールドの境界線を明確にします */
+    border-radius: 5px; /* 境界線の角を丸くします */
+}
+
+select {
+    width: 82%; /* selectボックスの幅を調整します */
+    padding: 10px; /* paddingを追加して見た目を整えます */
+    font-size: 16px; /* 文字サイズを大きくして読みやすくします */
+    border: 1px solid #ccc; /* 境界線を設定します */
+    border-radius: 5px; /* 境界線の角を丸くします */
+    background-color: white; /* 背景色を設定します */
+    margin-bottom: 10px; /* 下部の余白を設定します */
+}
+
+/* 入力フィールドにフォーカスしたときのスタイル */
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #4A90E2; /* フォーカス時の境界線の色を変更します */
+    outline: none; /* ブラウザのデフォルトのアウトラインを削除します */
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+table {
+    margin: 10px auto; /* テーブルを中央寄せ */
+}
+
+/* ボタンのスタイルは既に設定されているため、追加の中央揃えは不要ですが、
+   ボタンを含むコンテナがあれば、以下のスタイルを適用します。 */
+.button-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.input-section, .header-section {
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+button {
+    padding: 12px 20px; /* ボタンの内側の余白を増やす */
+    font-size: 16px; /* ボタン内のテキストサイズを大きくする */
+    cursor: pointer;
+    border: none;
+    border-radius: 5px; /* 角を丸くする */
+    background-color: #4A90E2; /* 背景色 */
+    color: white; /* テキスト色 */
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #357ABD; /* ホバー時の背景色を少し暗くする */
+}
+
+.output-frame {
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    height: auto; /* 固定の高さから自動の高さに変更 */
+    overflow-y: auto; /* 縦方向のスクロールバーを設定 */
+}
+
+/* メッセージ表示用のスタイル */
+#message {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px;
+    margin-top: 20px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* 成功メッセージ用のスタイル */
+.success {
+    color: green;
+    border-color: green;
+}
+
+/* エラーメッセージ用のスタイル */
+.error {
+    color: red;
+    border-color: red;
+}
+/* 既存のスタイル */
+
+
+@media screen and (max-width: 400px) {
+    /* スマートフォン表示のスタイル調整 */
+    #headerTable, 
+    #headerTable thead, 
+    #headerTable tbody, 
+    #headerTable th, 
+    #headerTable td, 
+    #headerTable tr { 
+        display: block; 
+    }
+
+    #headerTable thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    #headerTable td {
+        /* セルごとにマージンとパディングを設定 */
+        margin: 0;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        position: relative;
+        padding-left: 50%;
+        text-align: left;
+        width: 50%;
+    }
+
+    #headerTable td:before {
+        /* テーブルのヘッダーをセルのラベルとして表示 */
+        position: absolute;
+        left: 10px;
+        width: 45%; /* ラベルの幅を指定 */
+        padding-right: 10px; /* ラベルとテキストの間にスペースを設定 */
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        padding:20px;
+        width: 50%;
+    }
+
+    #headerTable td:before {
+        content: attr(data-label);
+    }
+
+    /* ボタンのサイズやパディングも必要に応じて調整 */
+    #addRowButton, 
+    #removeRowButton {
+        width: 100%;
+        margin: 10px 0; /* ボタンの上下のマージンを設定 */
+    }
+}
+
+
