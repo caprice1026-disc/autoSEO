@@ -6,7 +6,7 @@ import json
 import os
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.urandom(24)  # 24バイトのランダムなキーを生成
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["SESSION_PERMANENT"] = False  # セッションをブラウザを閉じたら破棄
 app.config["SESSION_TYPE"] = "filesystem"  # セッションをファイルシステムに保存
 Session(app)  # セッションをアプリケーションに登録
@@ -72,7 +72,7 @@ def generate(responses, system_prompt):
             
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
 
 '''openai_api_call関数を呼び出しているが、これらはストリームのオンオフについての違いがある。
 ストリームのオンオフを定義するためには、openai_api_call関数にstream引数を追加し、他の引数と同様にデフォルト値を設定する。
