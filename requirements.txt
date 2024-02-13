@@ -1,0 +1,6 @@
+Flask
+Flask-Session
+openai
+requests
+beautifulsoup4
+google-api-python-client
