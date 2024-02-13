@@ -50,26 +50,25 @@ def handle_submit():
 # サーバーサイドイベントを送信するエンドポイント
 @app.route('/events')
 def events():
-    def generate():
-        responses = session.get("responses", [])
-        system_prompt = session.get("system_prompt", "")
+    responses = session.get("responses", [])
+    system_prompt = session.get("system_prompt", "")
+    return Response(generate(responses, system_prompt), mimetype='text/event-stream')
 
-        for response in responses:
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": response["text"]}
-            ]
-            # OpenAI APIの応答を返す
-            completion = openai_api_call(
-                "gpt-4-turbo-preview",
-                0,
-                messages,
-                4000,  # リード文の最大トークン数を適宜設定
-                {"type": "text"},
-                True
-            )
-            yield f"data: {json.dumps(completion)}\n\n"
-    return Response(generate(), mimetype='text/event-stream')
+def generate(responses, system_prompt):
+    model = "gpt-4-turbo-preview"
+    temperature = 0.5
+    max_tokens = 4000
+    response_format = {"type": "text"}
+    stream = True  # ストリーミング応答を有効化
+
+    for response in responses:
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": response["text"]}]
+        completion = openai_api_call(model, temperature, messages, max_tokens, response_format, stream)
+        for chunk in completion:  # ストリーミング応答をイテレート
+            yield f"data: {json.dumps({'content': chunk.choices[0].delta.content})}"
+
+
+            
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -93,7 +93,7 @@ function submitForm(event) {
             return response.json();
         })
         .then(data => {
-            startSSE('SSEのエンドポイントURL');
+            startSSE('/events');
             document.getElementById('message').textContent = 'データが正常に送信されました。';
             document.getElementById('message').className = 'success';
         })
