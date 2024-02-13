@@ -79,7 +79,7 @@ function submitForm(event) {
             jsonData.section2[`headline${index + 1}`] = { level, text, charCount, summary, keywords, notes };
         });
 
-        fetch('バックエンドのPOSTエンドポイントURL', {
+        fetch('/submit', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

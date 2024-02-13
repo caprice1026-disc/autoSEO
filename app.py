@@ -1,21 +1,29 @@
-from flask import Flask, request, jsonify, render_template
-from flask_socketio import SocketIO, emit
+from flask import Flask, request, jsonify, render_template, Response, session
+from flask_session import Session  # Flask-Sessionをインポート
 from backend.openaiapi import openai_api_call
 from backend.main import main
+import json
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+app.secret
+app.config["SESSION_PERMANENT"] = False  # セッションをブラウザを閉じたら破棄
+app.config["SESSION_TYPE"] = "filesystem"  # セッションをファイルシステムに保存
+Session(app)  # セッションをアプリケーションに登録
 
 @app.route('/')
 def index():
+    session["responses"] = []  # セッションでresponsesリストを初期化
     return render_template('index.html')
 
-@socketio.on('send_data')
-def handle_send_data(json_data):
+@app.route('/submit', methods=['POST'])
+def handle_submit():
+    json_data = request.json  # POSTリクエストのボディを取得
     try:
         system_prompt = main(json_data)
         section2 = json_data['section2']
         previous_content = ""
+
+        responses = []  # 応答を格納するためのリスト
 
         for headline_key, headline_value in section2.items():
             level = headline_value['level']
@@ -31,14 +39,27 @@ def handle_send_data(json_data):
                 f"記事を書く際は、'{notes}'を意識してください。これ以前の内容はこのようになっています。'{previous_content}'"
                 f"これに整合性を合わせて書いてください。"
             )
+            responses.append({"text": user_prompt})
+        session["responses"] = responses  # セッションにresponsesリストを保存
+        session["system_prompt"] = system_prompt
+        return jsonify({"message": "データを受け取り、処理が開始されました。"})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# サーバーサイドイベントを送信するエンドポイント
+@app.route('/events')
+def events():
+    def generate():
+        responses = session.get("responses", [])
+        system_prompt = session.get("system_prompt", "")
 
+        for response in responses:
             messages = [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
+                {"role": "user", "content": response["text"]}
             ]
-
-            # OpenAI APIを呼び出し（この部分は適宜書き換える）
-            response = openai_api_call(
+            # OpenAI APIの応答を返す
+            completion = openai_api_call(
                 "gpt-4-turbo-preview",
                 0,
                 messages,
@@ -46,25 +67,11 @@ def handle_send_data(json_data):
                 {"type": "text"},
                 True
             )
-
-            # 応答をクライアントに送信
-            for chunk in response.iter_content():
-              if chunk:
-                text_data = chunk.choices[0].delta.content
-                binary_data = text_data.encode('utf-8')
-                emit('response', binary_data, broadcast=True)
-                previous_content += response[0].choices[0].delta
-              if chunk == '[DONE]':
-                print(previous_content)
-                break
+            yield f"data: {json.dumps(completion)}\n\n"
 
 
-
-    except Exception as e:
-        emit('error', {'error': str(e)})
-        print(e)
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    app.run(debug=True)
 
 '''openai_api_call関数を呼び出しているが、これらはストリームのオンオフについての違いがある。
 ストリームのオンオフを定義するためには、openai_api_call関数にstream引数を追加し、他の引数と同様にデフォルト値を設定する。
