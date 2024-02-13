@@ -1,9 +1,12 @@
+// DOMが読み込まれた後にイベントリスナーを設定
 document.addEventListener('DOMContentLoaded', function() {
+    // 行の追加ボタンにイベントリスナーを追加
     document.getElementById('addRowButton').addEventListener('click', addRow);
     document.getElementById('removeRowButton').addEventListener('click', removeTableRow);
     document.getElementById('seoForm').addEventListener('submit', submitForm);
 });
 
+// テーブル行を追加する関数
 function addRow() {
     const table = document.getElementById('headerTable').getElementsByTagName('tbody')[0];
     const newRow = table.insertRow();
@@ -26,24 +29,32 @@ function addRow() {
     `;
 }
 
+// テーブル行を削除する関数
 function removeTableRow() {
     var table = document.getElementById('headerTable').getElementsByTagName('tbody')[0];
     var rowCount = table.rows.length;
     if (rowCount > 1) { // 最初の入力行は削除しない
+
         table.deleteRow(-1);
     }
 }
 
-function validateForm() {
-    var isValid = true;
-    var inputs = document.querySelectorAll('#seoForm input[type="text"], #seoForm textarea');
 
+// フォーム検証関数
+function validateForm(event) {
+    event.preventDefault(); // 実際のフォーム送信を阻止
+
+    var isValid = true; // フォームが有効かどうかを追跡するフラグ
+    var inputs = document.querySelectorAll('#seoForm input[type="text"], #seoForm textarea');
+    
+    // 入力フィールドの検証
     inputs.forEach(function(input) {
         if (input.value.trim() === '') {
             isValid = false;
         }
     });
 
+    // エラーメッセージの表示
     var messageElement = document.getElementById('message');
     if (!isValid) {
         messageElement.textContent = '未入力の箇所があります。';
@@ -136,6 +147,7 @@ function startSSE(endpoint) {
         console.log('SSE closed:', event);
     };
 }
+
 
 
 
